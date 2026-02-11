@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, RISE SICS.
+ * Copyright (c) 2005, Swedish Institute of Computer Science
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,51 +29,72 @@
  * This file is part of the Contiki operating system.
  *
  */
-
-/**
- * \file
- *         NullNet, a minimal network layer.
- * \author
- *         Simon Duquennoy <simon.duquennoy@ri.se>
- *
- */
-
-/**
- * \ingroup net-layer
- * \addtogroup nullnet
-A network layer that does nothing. Useful for lower-layer testing and
-for non-IPv6 scenarios.
- * @{
- */
-
-#ifndef NULLNET_H_
-#define NULLNET_H_
-
 #include "contiki.h"
-#include "net/linkaddr.h"
+#include "lib/sensors.h"
+#include "dev/hwconf.h"
+#include "dev/button-sensor.h"
+#include "isr_compat.h"
 
-/**
- * Buffer used by the output function
-*/
-#ifdef NULLNET_EXT
-extern void *nullnet_buf; // user-defined data
-#else
-extern uint8_t *nullnet_buf;
-#endif
-extern uint16_t nullnet_len;
+const struct sensors_sensor button_sensor;
 
-/**
- * Function prototype for NullNet input callback
-*/
-typedef void (* nullnet_input_callback)(const void *data, uint16_t len,
-  const linkaddr_t *src, const linkaddr_t *dest);
+static struct timer debouncetimer;
+static int status(int type);
 
-/**
- * Set input callback for NullNet
- *
- * \param callback The input callback
-*/
-void nullnet_set_input_callback(nullnet_input_callback callback);
+HWCONF_PIN(BUTTON, 2, 7);
+HWCONF_IRQ(BUTTON, 2, 7);
 
-#endif /* NULLNET_H_ */
-/** @} */
+/*---------------------------------------------------------------------------*/
+ISR(PORT2, irq_p2)
+{
+  if(BUTTON_CHECK_IRQ()) {
+    if(timer_expired(&debouncetimer)) {
+      timer_set(&debouncetimer, CLOCK_SECOND / 4);
+      sensors_changed(&button_sensor);
+      LPM4_EXIT;
+    }
+  }
+  P2IFG = 0x00;
+}
+/*---------------------------------------------------------------------------*/
+static int
+value(int type)
+{
+  return BUTTON_READ() || !timer_expired(&debouncetimer);
+}
+/*---------------------------------------------------------------------------*/
+static int
+configure(int type, int c)
+{
+  switch (type) {
+  case SENSORS_ACTIVE:
+    if (c) {
+      if(!status(SENSORS_ACTIVE)) {
+	timer_set(&debouncetimer, 0);
+	BUTTON_IRQ_EDGE_SELECTD();
+
+	BUTTON_SELECT();
+	BUTTON_MAKE_INPUT();
+
+	BUTTON_ENABLE_IRQ();
+      }
+    } else {
+      BUTTON_DISABLE_IRQ();
+    }
+    return 1;
+  }
+  return 0;
+}
+/*---------------------------------------------------------------------------*/
+static int
+status(int type)
+{
+  switch (type) {
+  case SENSORS_ACTIVE:
+  case SENSORS_READY:
+    return BUTTON_IRQ_ENABLED();
+  }
+  return 0;
+}
+/*---------------------------------------------------------------------------*/
+SENSORS_SENSOR(button_sensor, BUTTON_SENSOR,
+	       value, configure, status);

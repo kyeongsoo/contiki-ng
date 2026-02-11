@@ -52,13 +52,8 @@
 #include "sys/log.h"
 #define LOG_MODULE "NullNet"
 #define LOG_LEVEL LOG_LEVEL_NULLNET
-/* #define LOG_LEVEL LOG_LEVEL_INFO */
 
-#ifdef NULLNET_EXT
-void *nullnet_buf; // user-defined data
-#else
 uint8_t *nullnet_buf;
-#endif
 uint16_t nullnet_len;
 static nullnet_input_callback current_callback = NULL;
 /*--------------------------------------------------------------------*/

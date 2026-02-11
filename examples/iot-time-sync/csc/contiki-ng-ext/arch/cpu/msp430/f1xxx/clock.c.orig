@@ -65,12 +65,7 @@ ISR(TIMERA1, timera1)
 {
   watchdog_start();
 
-#ifdef RTIMER_EXT
-  int taiv = TAIV;
-  if(taiv == 2) {
-#else
   if(TAIV == 2) {
-#endif
 
     /* HW timer bug fix: Interrupt handler called before TR==CCR.
      * Occurs when timer state is toggled between STOP and CONT. */
@@ -104,12 +99,6 @@ ISR(TIMERA1, timera1)
     }
 
   }
-#ifdef RTIMER_EXT
-  else if(taiv == 10) {
-    /* overflow interrupt drives the higher bits of the extended 32-bit rtimer. */
-    ++rtimer_high_bits;
-  }
-#endif
   /*  if(process_nevents() >= 0) {
     LPM4_EXIT;
     }*/
@@ -134,9 +123,6 @@ clock_set(clock_time_t clock, clock_time_t fclock)
   TAR = fclock;
   TACCR1 = fclock + INTERVAL;
   count = clock;
-#ifdef RTIMER_EXT
-  rtimer_high_bits = 0;
-#endif
 }
 /*---------------------------------------------------------------------------*/
 int
@@ -192,10 +178,6 @@ clock_init(void)
   /* Enable interrupts. */
   eint();
 
-#ifdef RTIMER_EXT
-  TACTL |= TAIE; // enable overflow interrupt for the extended 32-bit rtimer
-  rtimer_high_bits = 0; // initialize high bits for the extended 32-bit rtimer
-#endif
 }
 /*---------------------------------------------------------------------------*/
 /**

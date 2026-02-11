@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, RISE SICS.
+ * Copyright (c) 2007, Swedish Institute of Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,48 +32,38 @@
 
 /**
  * \file
- *         NullNet, a minimal network layer.
+ *         A quick program that blinks the LEDs
  * \author
- *         Simon Duquennoy <simon.duquennoy@ri.se>
- *
+ *         Adam Dunkels <adam@sics.se>
  */
-
-/**
- * \ingroup net-layer
- * \addtogroup nullnet
-A network layer that does nothing. Useful for lower-layer testing and
-for non-IPv6 scenarios.
- * @{
- */
-
-#ifndef NULLNET_H_
-#define NULLNET_H_
 
 #include "contiki.h"
-#include "net/linkaddr.h"
+#include "dev/button.h"
+#include "dev/leds.h"
 
-/**
- * Buffer used by the output function
-*/
-#ifdef NULLNET_EXT
-extern void *nullnet_buf; // user-defined data
-#else
-extern uint8_t *nullnet_buf;
-#endif
-extern uint16_t nullnet_len;
+/*---------------------------------------------------------------------------*/
+PROCESS(blink_process, "Blink");
+AUTOSTART_PROCESSES(&blink_process);
+/*---------------------------------------------------------------------------*/
+PROCESS_THREAD(blink_process, ev, data)
+{
+  PROCESS_EXITHANDLER(goto exit;)
+  PROCESS_BEGIN();
 
-/**
- * Function prototype for NullNet input callback
-*/
-typedef void (* nullnet_input_callback)(const void *data, uint16_t len,
-  const linkaddr_t *src, const linkaddr_t *dest);
+  button_init(NULL);
 
-/**
- * Set input callback for NullNet
- *
- * \param callback The input callback
-*/
-void nullnet_set_input_callback(nullnet_input_callback callback);
+  while(1) {
+    static struct etimer et;
+    etimer_set(&et, 1*CLOCK_SECOND);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    leds_on(LEDS_ALL);
+    etimer_set(&et, 5*CLOCK_SECOND);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    leds_off(LEDS_ALL);
+  }
 
-#endif /* NULLNET_H_ */
-/** @} */
+ exit:
+  leds_off(LEDS_ALL);
+  PROCESS_END();
+}
+/*---------------------------------------------------------------------------*/

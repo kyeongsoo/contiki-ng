@@ -55,11 +55,7 @@ for non-IPv6 scenarios.
 /**
  * Buffer used by the output function
 */
-#ifdef NULLNET_EXT
-extern void *nullnet_buf; // user-defined data
-#else
 extern uint8_t *nullnet_buf;
-#endif
 extern uint16_t nullnet_len;
 
 /**
