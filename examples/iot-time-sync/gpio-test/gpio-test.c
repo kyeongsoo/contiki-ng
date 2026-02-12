@@ -5,7 +5,7 @@
 #include "sys/rtimer.h"
 
 /* Define the bit mask for P2.X */
-#define P2_PIN  (1 << P2_EXT)
+// #define P2_PIN  (1 << P2_EXT)
 
 /* Link to the variables in button-sensor.c */
 #ifdef RTIMER_EXT
@@ -27,12 +27,12 @@ PROCESS_THREAD(gpio_trigger_process, ev, data)
   /* 1. ACTIVATE BUTTON (The Probe) */
   SENSORS_ACTIVATE(button_sensor);
 
-  /* 2. CONFIGURE P2_PIN (The Jumper) */
-  P2SEL &= ~P2_PIN; // as GPIO
-  P2DIR &= ~P2_PIN; // as input
-  P2IES &= ~P2_PIN; // rising edge
-  P2IE  |= P2_PIN;  // enable interrupt
-  P2IFG &= ~P2_PIN; // clear any initial noise
+  // /* 2. CONFIGURE P2_PIN (The Jumper) */
+  // P2SEL &= ~P2_PIN; // as GPIO
+  // P2DIR &= ~P2_PIN; // as input
+  // P2IES &= ~P2_PIN; // rising edge
+  // P2IE  |= P2_PIN;  // enable interrupt
+  // P2IFG &= ~P2_PIN; // clear any initial noise
 
   printf("TelosB Sync App Started.\n");
   printf("Hold Jumper to VCC and press Button to inspect P2IFG.\n");

@@ -46,6 +46,7 @@ HWCONF_IRQ(BUTTON, 2, 7);
 #ifdef P2_EXT
 /* enable GIOx for event detection and high-quality timestamping */
 #include "sys/rtimer.h"
+#define P2_GIO_PIN  (1 << P2_EXT)
 #ifdef RTIMER_EXT
 volatile rtimer32_clock_t gio_timestamp = 0;
 #else
@@ -58,7 +59,7 @@ extern struct process *button_sensor_ext_process;
 
 ISR(PORT2, irq_p2)
 {
-  if(P2IFG & (1 << P2_EXT)) {
+  if(P2IFG & P2_GIO_PIN) {
 #ifdef RTIMER_EXT
     gio_timestamp = RTIMER32_NOW();
 #else
@@ -112,6 +113,15 @@ configure(int type, int c)
 
 	BUTTON_ENABLE_IRQ();
       }
+#ifdef P2_EXT
+      /* enable GIOx for event detection and high-quality timestamping */
+      /* 2. CONFIGURE P2_PIN (The Jumper) */
+      P2SEL &= ~P2_GIO_PIN; // as GPIO
+      P2DIR &= ~P2_GIO_PIN; // as input
+      P2IES &= ~P2_GIO_PIN; // rising edge
+      P2IE  |= P2_GIO_PIN;  // enable interrupt
+      P2IFG &= ~P2_GIO_PIN; // clear any initial noise
+#endif
     } else {
       BUTTON_DISABLE_IRQ();
     }
