@@ -4,8 +4,6 @@ all: $(CONTIKI_PROJECT)
 PROJECT_SOURCEFILES += csc.c
 TARGET_LIBFILES += -lm
 
-CONTIKI = ../../..
-
 MAKE_MAC = MAKE_MAC_CSMA
 MAKE_NET = MAKE_NET_NULLNET
 
@@ -21,8 +19,9 @@ DEFINES += LOG_CONF_LEVEL_SKY=0
 # enable my extensions
 DEFINES += NULLNET_EXT=1
 # DEFINES += P2_EXT=1 # edge detection and timestamping at P2.1 (GIO1) # now working!
-DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GIO2) # working!
-# DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GIO3) # working!
+# DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GIO2) # working!
+DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GIO3) # working!
 DEFINES += RTIMER_EXT=1
 
+CONTIKI = ../../..
 include $(CONTIKI)/Makefile.include

@@ -91,6 +91,9 @@ typedef uint64_t rtimer_clock_t;
 #endif
 
 #define RTIMER_CLOCK_MAX           ((rtimer_clock_t)-1)
+#ifdef RTIMER_EXT
+#define RTIMER32_CLOCK_MAX         ((rtimer32_clock_t)-1)
+#endif
 #define RTIMER_CLOCK_LT(a, b)      (RTIMER_CLOCK_DIFF((a),(b)) < 0)
 
 #include "rtimer-arch.h"

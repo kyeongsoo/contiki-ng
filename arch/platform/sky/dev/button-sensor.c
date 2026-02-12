@@ -55,7 +55,7 @@ volatile rtimer_clock_t gio_timestamp = 0;
 volatile uint8_t gio_triggered = 0;
 
 /* external process pointer for the poll */
-extern struct process *button_sensor_ext_process;
+extern struct process *p2_ext_process;
 
 ISR(PORT2, irq_p2)
 {
@@ -66,7 +66,7 @@ ISR(PORT2, irq_p2)
     gio_timestamp = RTIMER_NOW();
 #endif
     gio_triggered = 1;
-    process_poll(button_sensor_ext_process);
+    process_poll(p2_ext_process);
     LPM4_EXIT;
   }
   if(BUTTON_CHECK_IRQ()) {

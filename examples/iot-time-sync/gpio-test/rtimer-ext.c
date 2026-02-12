@@ -28,7 +28,7 @@
 // }
 
 PROCESS(rtimer_ext_process, "32-Bit Rtimer Extension");
-struct process *button_sensor_ext_process = &rtimer_ext_process; // for the button-sensor extension
+struct process *p2_ext_process = &rtimer_ext_process; // for the button-sensor extension
 AUTOSTART_PROCESSES(&rtimer_ext_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(rtimer_ext_process, ev, data)

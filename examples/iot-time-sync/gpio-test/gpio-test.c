@@ -17,7 +17,7 @@ extern volatile uint8_t gio_triggered;
 
 /*---------------------------------------------------------------------------*/
 PROCESS(gpio_trigger_process, "GPIO Trigger Process");
-struct process *button_sensor_ext_process = &gpio_trigger_process; // for the button-sensor extension
+struct process *p2_ext_process = &gpio_trigger_process; // for the button-sensor extension
 AUTOSTART_PROCESSES(&gpio_trigger_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(gpio_trigger_process, ev, data)
