@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = csc-analysis csc-client csc-server gpio-trigger
+CONTIKI_PROJECT = csc-analysis csc-client csc-server
 all: $(CONTIKI_PROJECT)
 
 PROJECT_SOURCEFILES += csc.c
@@ -22,6 +22,11 @@ DEFINES += NULLNET_EXT=1
 # DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GIO2) # working!
 DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GIO3) # working!
 DEFINES += RTIMER_EXT=1
+
+# optimize CSC implementation
+DEFINES += CSC_DS_OPT1=1 # turn off iteration couting in DS
+DEFINES += CSC_DS_OPT2 # enable branchless programming in DS
+DEFINES += CSC_DIV_OPT # turn off checking the value of A in division algos
 
 CONTIKI = ../../..
 include $(CONTIKI)/Makefile.include

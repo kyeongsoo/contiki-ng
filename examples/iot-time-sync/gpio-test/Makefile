@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = telosb-button
+CONTIKI_PROJECT = gpio-test
 all: $(CONTIKI_PROJECT)
 
 MAKE_MAC = MAKE_MAC_CSMA

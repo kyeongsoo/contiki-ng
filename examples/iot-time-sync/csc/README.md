@@ -1,12 +1,12 @@
 # Clock skew compensation (CSC)
 
 ## Introduction
-TBD
+### TBD
 
 ## Experimental Setup
-TBD: To decide the size of timestamps (i.e., 16 or 32 bits?) based on the time
-periods for synchronzation and event monitoring on the on Telosb motes with
-16-bit MSP430 microcontroller.
+### TBD
+1. To decide the size of timestamps (i.e., 16 or 32 bits?) based on the time periods for synchronzation and event monitoring on the on Telosb motes with 16-bit MSP430 microcontroller.
+2. To turn off the radio after the completion of cumulative ratio (CR) estimation of clock frequency ratio (CFR) in order to avoid any interference between Zigbee frame reception and GPIO event detection.
 
 ## How to run a project on a TelosB mote
 1. First check the port (e.g., "/dev/ttyUSB0").

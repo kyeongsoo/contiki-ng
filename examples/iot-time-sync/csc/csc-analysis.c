@@ -19,10 +19,6 @@
 #define LOG_MODULE "CSC-Analysis"
 #define LOG_LEVEL LOG_LEVEL_NONE
 
-// control CSC optimization
-#define _OPT2 // enable branchless programming in DS
-#define _OPT3 // turn off checking the value of A in division algos
-
 PROCESS(csc_analysis_process, "CSC analysis process");
 AUTOSTART_PROCESSES(&csc_analysis_process);
 

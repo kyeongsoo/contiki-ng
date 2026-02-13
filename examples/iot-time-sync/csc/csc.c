@@ -3,6 +3,11 @@
  *         Analysis of clock skew compensation (CSC) algorithms
  * \author
  *         Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+ * \note
+ *         Optimization options controlled by macro definition:
+ *         - CSC_DS_OPT1 // turn off iteration couting in DS
+ *         - CSC_DS_OPT2 // enable branchless programming in DS
+ *         - CSC_DIV_OPT // turn off checking the value of A in division algos
  */
 
 /* #include <inttypes.h> */
@@ -17,10 +22,6 @@
 #define NO_LLABS // llabs() is missing on MSP430 platforms
 #endif
 
-/* optimization level */
-#define CSC_DS_OPT1 // turn off iteration couting in DS
-#define CSC_DS_OPT2 // enable branchless programming in DS
-#define CSC_DIV_OPT // turn off checking the value of A in division algos
 #ifndef ABS
 #define ABS(x) (((x) < 0) ? -(x) : (x))
 // #ifdef NO_LLABS
