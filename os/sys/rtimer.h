@@ -90,9 +90,19 @@ typedef uint64_t rtimer_clock_t;
 #error Unsupported rtimer size (check RTIMER_CLOCK_SIZE)
 #endif
 
+#ifdef RTIMER_EXT
+typedef uint32_t rtimer_ext_clock_t;
+#define RTIMER_PRI_EXT PRIu32
+#else
+typedef uint16_t rtimer_ext_clock_t;
+#define RTIMER_PRI_EXT PRIu16
+#endif
+
 #define RTIMER_CLOCK_MAX           ((rtimer_clock_t)-1)
 #ifdef RTIMER_EXT
-#define RTIMER32_CLOCK_MAX         ((rtimer32_clock_t)-1)
+#define RTIMER_EXT_CLOCK_MAX       ((rtimer_ext_clock_t)-1)
+#else
+#define RTIMER_EXT_CLOCK_MAX       ((rtimer_clock_t)-1)
 #endif
 #define RTIMER_CLOCK_LT(a, b)      (RTIMER_CLOCK_DIFF((a),(b)) < 0)
 
@@ -193,7 +203,9 @@ void rtimer_run_next(void);
  */
 #define RTIMER_NOW() rtimer_arch_now()
 #ifdef RTIMER_EXT
-#define RTIMER32_NOW() rtimer32_arch_now()
+#define RTIMER_EXT_NOW() rtimer_ext_arch_now()
+#else
+#define RTIMER_EXT_NOW() rtimer_arch_now()
 #endif
 
 /**

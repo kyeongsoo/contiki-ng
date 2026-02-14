@@ -3,11 +3,7 @@
 
 typedef struct {
     uint32_t seq_num;
-#ifdef RTIMER_EXT
-    rtimer32_clock_t timestamp; // 32-bit timestamp for extended rtimer
-#else
-    rtimer_clock_t timestamp; // 16-bit timestamp for standard rtimer
-#endif
+    rtimer_ext_clock_t timestamp; // 16/32-bit timestamp (controlled by RTIMER_EXT definition)
 } csc_data_t;
     
 #endif

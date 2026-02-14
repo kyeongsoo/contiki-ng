@@ -61,8 +61,7 @@
 rtimer_clock_t rtimer_arch_now(void);
 #ifdef RTIMER_EXT
 volatile rtimer_clock_t rtimer_high_bits;
-typedef uint32_t rtimer32_clock_t;
-rtimer32_clock_t rtimer32_arch_now(void);
+rtimer_ext_clock_t rtimer_ext_arch_now(void);
 #endif
 
 #endif /* RTIMER_ARCH_H_ */

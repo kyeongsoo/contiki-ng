@@ -90,9 +90,8 @@ rtimer_arch_now(void)
 }
 /*---------------------------------------------------------------------------*/
 #ifdef RTIMER_EXT
-// 
-rtimer32_clock_t
-rtimer32_arch_now(void)
+rtimer_ext_clock_t
+rtimer_ext_arch_now(void)
 {
   rtimer_clock_t h1, h2, l;
   // Strategy to prevent race condition during overflow:

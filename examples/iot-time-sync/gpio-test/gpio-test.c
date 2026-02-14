@@ -8,11 +8,7 @@
 // #define P2_PIN  (1 << P2_EXT)
 
 /* Link to the variables in button-sensor.c */
-#ifdef RTIMER_EXT
-extern rtimer32_clock_t gio_timestamp;
-#else
-extern rtimer_clock_t gio_timestamp;
-#endif
+extern rtimer_ext_clock_t gio_timestamp;
 extern volatile uint8_t gio_triggered;
 
 /*---------------------------------------------------------------------------*/
@@ -54,9 +50,9 @@ PROCESS_THREAD(gpio_trigger_process, ev, data)
     if(ev == PROCESS_EVENT_POLL && gio_triggered == 1) {
       printf(">>> SUCCESS: P2.%d (Jumper) Triggered the ISR directly!\n", P2_EXT);
 #ifdef RTIMER_EXT
-      printf("Captured 32-bit timestamp: %10ld\n", gio_timestamp);
+      printf("Captured 32-bit timestamp: %10"RTIMER_PRI_EXT"\n", gio_timestamp);
 #else
-      printf("Captured 16-bit timestamp: %5u\no", gio_timestamp);
+      printf("Captured 16-bit timestamp: %5"RTIMER_PRI_EXT"\no", gio_timestamp);
 #endif
       // printf("Captured P2IFG: 0x%02X\n", debug_flags);
       // printf("Captured P2SEL: 0x%02X\n", debug_sel);

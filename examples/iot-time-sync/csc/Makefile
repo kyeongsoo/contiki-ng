@@ -21,7 +21,7 @@ DEFINES += NULLNET_EXT=1
 # DEFINES += P2_EXT=1 # edge detection and timestamping at P2.1 (GIO1) # now working!
 # DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GIO2) # working!
 DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GIO3) # working!
-DEFINES += RTIMER_EXT=1
+# DEFINES += RTIMER_EXT=1
 
 # optimize CSC implementation
 DEFINES += CSC_DS_OPT1=1 # turn off iteration couting in DS

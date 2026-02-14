@@ -47,11 +47,7 @@ HWCONF_IRQ(BUTTON, 2, 7);
 /* enable GIOx for event detection and high-quality timestamping */
 #include "sys/rtimer.h"
 #define P2_GIO_PIN  (1 << P2_EXT)
-#ifdef RTIMER_EXT
-volatile rtimer32_clock_t gio_timestamp = 0;
-#else
-volatile rtimer_clock_t gio_timestamp = 0;
-#endif
+volatile rtimer_ext_clock_t gio_timestamp = 0;
 volatile uint8_t gio_triggered = 0;
 
 /* external process pointer for the poll */
@@ -60,11 +56,7 @@ extern struct process *p2_ext_process;
 ISR(PORT2, irq_p2)
 {
   if(P2IFG & P2_GIO_PIN) {
-#ifdef RTIMER_EXT
-    gio_timestamp = RTIMER32_NOW();
-#else
-    gio_timestamp = RTIMER_NOW();
-#endif
+    gio_timestamp = RTIMER_EXT_NOW();
     gio_triggered = 1;
     process_poll(p2_ext_process);
     LPM4_EXIT;
