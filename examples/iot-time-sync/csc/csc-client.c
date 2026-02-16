@@ -73,8 +73,8 @@ void input_callback(const void *data, uint16_t len,
     num_beacons++;
     if (cfr_initialized == false) {
       if (num_beacons <= NB_SKIP) {
-        LOG_INFO("t=%"RTIMER_PRI_EXT": Skip a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT"\n",
-          rx_timestamp, seq_num, tx_timestamp);
+        LOG_INFO("Skip a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT", rx_ts=%"RTIMER_PRI_EXT", num_beacons=%"PRIu32"\n",
+          seq_num, tx_timestamp, rx_timestamp, num_beacons);
       }
       else {
         // handle timestamp wraparound
@@ -90,8 +90,8 @@ void input_callback(const void *data, uint16_t len,
         }
         A += iat;
         D += idt;
-        LOG_INFO("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT", rx_ts=%"RTIMER_PRI_EXT", A=%"PRIu64", D=%"PRIu64", num_beacons=%"PRIu32"\n",
-          nn_data.seq_num, tx_timestamp, rx_timestamp, A, D, num_beacons);
+        LOG_INFO("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT", rx_ts=%"RTIMER_PRI_EXT", num_beacons=%"PRIu32", A=%"PRIu64", D=%"PRIu64"\n",
+                 nn_data.seq_num, tx_timestamp, rx_timestamp, num_beacons, A, D);
         if (num_beacons == (NB_SKIP + NB_CFR)) {
           cfr_initialized = true;
           LOG_INFO("CFR initialized: A=%"PRIu64", D=%"PRIu64"\n", A, D);

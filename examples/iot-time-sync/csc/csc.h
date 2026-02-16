@@ -1,9 +1,18 @@
-#ifndef CSC_H
-#define CSC_H
+#ifndef CSC_H_
+#define CSC_H_
 
-int64_t csc_dp_div(int64_t i, int64_t D, int64_t A, int *p_num_iter);
-int64_t csc_sp_div(int64_t i, int64_t D, int64_t A, int *p_num_iter);
-// static uint64_t csc_ds(uint64_t i, uint64_t D, uint64_t A, int *p_num_iter);
-int64_t csc_ds(int64_t i, int64_t D, int64_t A, int *p_num_iter);
-
+#if CSC_INT_SIZE == 4
+typedef int32_t csc_int_t;
+#define CSC_INT_PRI PRId32
+#elif CSC_INT_SIZE == 8
+typedef int64_t csc_int_t;
+#define CSC_INT_PRI PRId64
+#else
+#error Unsupported CSC_INT_SIZE
 #endif
+
+csc_int_t csc_dp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
+csc_int_t csc_sp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
+csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
+
+#endif /* CSC_H_ */

@@ -59,8 +59,10 @@ PROCESS_THREAD(csc_server_process, ev, data)
       nullnet_len = sizeof(nn_data);
       nn_data.timestamp = RTIMER_EXT_NOW();
       NETSTACK_NETWORK.output(NULL);
-      LOG_INFO("Send a beacon with seq_num=%"PRIu32", timestamp=%"RTIMER_PRI_EXT"\n",
-        nn_data.seq_num, nn_data.timestamp);
+      if (event_initialized == false) {
+        LOG_INFO("Send a beacon with seq_num=%"PRIu32", timestamp=%"RTIMER_PRI_EXT"\n",
+          nn_data.seq_num, nn_data.timestamp);
+      }
       nn_data.seq_num++;
       etimer_reset(&periodic_timer);
     }
@@ -74,7 +76,7 @@ PROCESS_THREAD(csc_server_process, ev, data)
 
         // post-processing indicator and header row for column names in CSV format
         printf("##### BEGIN\n"); 
-        printf("event_number,i,elapsed_time\n");
+        printf("event_number,elapsed_time\n");
       }
       else {
         // handle timestamp wraparound
@@ -84,7 +86,7 @@ PROCESS_THREAD(csc_server_process, ev, data)
           iet = (uint64_t)(gio_timestamp - gio_timestamp_prev);
         }
         elapsed_time += iet;
-        LOG_INFO("Event with timestamp=%"RTIMER_PRI_EXT", event_number=%"PRIu32", elapsed_time=%"PRIu64"\n",
+        LOG_DBG("Event with timestamp=%"RTIMER_PRI_EXT", event_number=%"PRIu32", elapsed_time=%"PRIu64"\n",
           gio_timestamp, event_number, elapsed_time);
         printf("%"PRIu32",%"PRIu64"\n", event_number, elapsed_time);
         event_number++; // only after event initialization

@@ -30,7 +30,7 @@ if __name__ == "__main__":
         type=str)
     arg = parser.parse_args()
 
-    alg_names = {"ds": "Direct Search", "sp_div": "Sing Precision"}
+    alg_names = {"ds": "Direct Search", "sp_div": "Single-Precision Division"}
     log_file = arg.log_file
     df = pd.read_csv(log_file, header=0)
 
