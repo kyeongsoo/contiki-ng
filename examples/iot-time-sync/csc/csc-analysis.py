@@ -19,6 +19,7 @@ import argparse
 import pandas as pd
 from pathlib import Path
 
+RTIMER_SECOND = 32768 # number of rtimer ticks per second for sky/TelosB platform in contiki-ng
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -30,9 +31,10 @@ if __name__ == "__main__":
         type=str)
     arg = parser.parse_args()
 
-    alg_names = {"ds": "Direct Search", "sp_div": "Single-Precision Division"}
+    alg_names = {"ds": "Direct Search", "sp": "Single-Precision Division"}
     log_file = arg.log_file
     df = pd.read_csv(log_file, header=0)
+    df['elapsed_us'] = df['elapsed_ticks'] * 1.0E6 / RTIMER_SECOND
 
     md_file = (Path(log_file).with_suffix("").with_suffix(".md"))
     pd.set_option('display.float_format', '{:.4e}'.format)
@@ -40,6 +42,6 @@ if __name__ == "__main__":
         for p in range(6, 10):
             i = 10**p
             f.write(f"# i={i:.0e}\n")
-            for alg in ['ds', 'sp_div']:
+            for alg in ['ds', 'sp']:
                 f.write("## " + alg_names[alg] + "\n")
                 f.write(df[(df['alg'] == alg) & (df['i'] == i)].iloc[:,5:].describe().to_string() + "\n")

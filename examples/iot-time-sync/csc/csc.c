@@ -26,7 +26,7 @@
 /**
  * \brief CSC based on double-precision FP division.
  */
-csc_int_t csc_dp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter)
+csc_int_t csc_dp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter)
 {
     *p_num_iter = 1;
 #ifndef CSC_DIV_OPT
@@ -40,7 +40,7 @@ csc_int_t csc_dp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, ui
 /**
  * \brief CSC based on single-precision FP division.
  */
-csc_int_t csc_sp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter)
+csc_int_t csc_sp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter)
 {
     *p_num_iter = 1;
 #ifndef CSC_DIV_OPT

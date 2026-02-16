@@ -11,8 +11,8 @@ typedef int64_t csc_int_t;
 #error Unsupported CSC_INT_SIZE
 #endif
 
-csc_int_t csc_dp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
-csc_int_t csc_sp_div(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
+csc_int_t csc_dp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
+csc_int_t csc_sp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
 csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter);
 
 #endif /* CSC_H_ */

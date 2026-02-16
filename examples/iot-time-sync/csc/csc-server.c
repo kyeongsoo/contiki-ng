@@ -1,8 +1,7 @@
 /**
- * \file
- *         A server for CSC experiments.
- * \author
- *         Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+ * \brief A server for CSC experiments.
+ * 
+ * \author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
  */
 
 #include <stdbool.h>
@@ -32,7 +31,7 @@ static uint64_t iet = 0ULL; // inter-event time
 static rtimer_ext_clock_t gio_timestamp_prev = 0;
 
 PROCESS(csc_server_process, "A server for CSC experiments");
-struct process *p2_ext_process = &csc_server_process; // for the P2 extension
+struct process *p2_ext_process = &csc_server_process; // for P2 extension
 AUTOSTART_PROCESSES(&csc_server_process);
 
 PROCESS_THREAD(csc_server_process, ev, data)
@@ -72,7 +71,6 @@ PROCESS_THREAD(csc_server_process, ev, data)
       if (event_initialized == false) {
         event_initialized = true;
         LOG_INFO("Detect 1st event with timestamp=%"RTIMER_PRI_EXT"\n", gio_timestamp);
-        // log_set_level("CSC-Server", LOG_LEVEL_NONE); // disable log after event initialization
 
         // post-processing indicator and header row for column names in CSV format
         printf("##### BEGIN\n"); 
@@ -92,7 +90,7 @@ PROCESS_THREAD(csc_server_process, ev, data)
         event_number++; // only after event initialization
       }
       gio_timestamp_prev = gio_timestamp;
-      gio_triggered = 0; // reset the trigger for the next event
+      gio_triggered = 0; // clear the flag
     }
   }
 
