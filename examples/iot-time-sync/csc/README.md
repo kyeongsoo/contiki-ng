@@ -33,6 +33,7 @@ make TARGET=sky MOTES=/dev/ttyUSB0 login | tee ./log/csc-analysis_$(date +'%Y%m%
 3. Process the log file (e.g., ".log/csc-analysis.log")
 ```
 log-process.sh ./log/csc-analysis.log
+python csc-analysis.py -l ./log/csc-analysis.log
 ```
 
 ## References

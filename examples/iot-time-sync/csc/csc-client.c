@@ -146,13 +146,16 @@ PROCESS_THREAD(csc_client_process, ev, data)
           printf("%"PRIu32",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI"\n",
             event_number, elapsed_time, rst_ds, rst_sp, diff);
           event_number++; // only after event initialization
-        }
+          
+          // TBD: terminate the experiment and print end indicator
+          
+        } // end of else for "event_initialized == true"
         gio_timestamp_prev = gio_timestamp;
         gio_triggered = 0; // clear the flag
-      }
-    }
+      } // end of if() for "cfr_initialized == true"
+    } // end of if() for event handling
 #endif
-  }
+  } // end of while()
 
   PROCESS_END();
 }

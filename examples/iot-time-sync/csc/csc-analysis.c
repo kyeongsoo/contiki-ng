@@ -81,7 +81,7 @@ PROCESS_THREAD(csc_analysis_process, ev, data)
         /* Wait for the periodic timer to expire and then restart the timer. */
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
         etimer_reset(&timer);
-    } // end of while() 
+    } // end of while()
 
     PROCESS_END();
 }
