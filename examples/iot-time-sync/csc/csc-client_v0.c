@@ -18,15 +18,8 @@
 
 #define LOG_MODULE "CSC-Client"
 #define LOG_LEVEL LOG_LEVEL_INFO
-#ifndef NB_SKIP
 #define NB_SKIP 10 // number of initial beacons to skip before CFR initialization
-#endif
-#ifndef NB_CFR
 #define NB_CFR 100 // number of beacons for CFR initialization
-#endif
-#ifndef EVENT_NUMBER_MAX // maximum number of events to process after CFR initialization
-#define EVENT_NUMBER_MAX 1000
-#endif
 
 static bool cfr_initialized = false;
 static uint32_t seq_num = 0;
@@ -154,11 +147,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
             event_number, elapsed_time, rst_ds, rst_sp, diff);
           event_number++; // only after event initialization
           
-          if (event_number == EVENT_NUMBER_MAX) {
-            // indicator for post-processing
-            printf("##### END\n");
-            break; // end the process
-          }
+          // TBD: terminate the experiment and print end indicator
           
         } // end of else for "event_initialized == true"
         gio_timestamp_prev = gio_timestamp;

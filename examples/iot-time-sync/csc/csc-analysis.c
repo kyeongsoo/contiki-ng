@@ -27,7 +27,8 @@ PROCESS_THREAD(csc_analysis_process, ev, data)
     // experimental parameters
     csc_int_t D = 1000000; // corresponding to 1s
     int skew_max = 100; // skew bound in ppm
-    int N_samples = 10000; // Number of samples for D
+    // int N_samples = 10000; // Number of samples for D
+    int N_samples = 100; // Number of samples for D
     csc_int_t is[] = {1000000, 10000000, 100000000, 1000000000};
     int N_is = sizeof(is) / sizeof(is[0]);
 
@@ -75,8 +76,7 @@ PROCESS_THREAD(csc_analysis_process, ev, data)
 
         // indicator for post-processing
         printf("##### END\n");
-
-        while (1);
+        break; // end the process
         
         /* Wait for the periodic timer to expire and then restart the timer. */
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));

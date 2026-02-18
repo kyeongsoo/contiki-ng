@@ -18,13 +18,7 @@
 #define LOG_MODULE "CSC-Server"
 #define LOG_LEVEL LOG_LEVEL_INFO
 
-#ifndef BEACON_INTERVAL // beacon interval in seconds
-#ifdef RTIMER_EXT
-#define BEACON_INTERVAL 100 // <= RTIMER_EXT_CLOCK_MAX/RTIMER_SECOND (~131,072 s (1.52 days) for TelosB)
-#else
-#define BEACON_INTERVAL 1 // <= RTIMER_CLOCK_MAX/RTIMER_SECOND (~2 s for TelosB)
-#endif
-#endif
+#define BEACON_INTERVAL (1 * CLOCK_SECOND) // 1 <= RTIMER_CLOCK_MAX/RTIMER_SECOND (=2 for TelosB)
 
 // GPIO trigger external variables
 extern rtimer_ext_clock_t gio_timestamp;
@@ -32,8 +26,8 @@ extern volatile uint8_t gio_triggered;
 
 static bool event_initialized = false;
 static uint32_t event_number = 0;
-static uint64_t elapsed_ticks = 0ULL;
-static uint64_t iet = 0ULL; // inter-event ticks
+static uint64_t elapsed_time = 0ULL;
+static uint64_t iet = 0ULL; // inter-event time
 static rtimer_ext_clock_t gio_timestamp_prev = 0;
 
 PROCESS(csc_server_process, "A server for CSC experiments");
@@ -54,7 +48,7 @@ PROCESS_THREAD(csc_server_process, ev, data)
   nullnet_buf = (csc_data_t *)&nn_data;
   nullnet_len = sizeof(nn_data);
   
-  etimer_set(&periodic_timer, BEACON_INTERVAL*CLOCK_SECOND);
+  etimer_set(&periodic_timer, BEACON_INTERVAL);
   while (1) {
     PROCESS_WAIT_EVENT();
 
@@ -73,14 +67,14 @@ PROCESS_THREAD(csc_server_process, ev, data)
     }
 
     // process GPIO trigger at P2.x
-    if (ev == PROCESS_EVENT_POLL && gio_triggered == 1) {
+    if(ev == PROCESS_EVENT_POLL && gio_triggered == 1) {
       if (event_initialized == false) {
         event_initialized = true;
         LOG_INFO("Detect 1st event with timestamp=%"RTIMER_PRI_EXT"\n", gio_timestamp);
 
         // post-processing indicator and header row for column names in CSV format
         printf("##### BEGIN\n"); 
-        printf("event_number,elapsed_ticks\n");
+        printf("event_number,elapsed_time\n");
       }
       else {
         // handle timestamp wraparound
@@ -89,22 +83,16 @@ PROCESS_THREAD(csc_server_process, ev, data)
         } else {
           iet = (uint64_t)(gio_timestamp - gio_timestamp_prev);
         }
-        elapsed_ticks += iet;
-        LOG_DBG("Event with timestamp=%"RTIMER_PRI_EXT", event_number=%"PRIu32", elapsed_ticks=%"PRIu64"\n",
-          gio_timestamp, event_number, elapsed_ticks);
-        printf("%"PRIu32",%"PRIu64"\n", event_number, elapsed_ticks);
+        elapsed_time += iet;
+        LOG_DBG("Event with timestamp=%"RTIMER_PRI_EXT", event_number=%"PRIu32", elapsed_time=%"PRIu64"\n",
+          gio_timestamp, event_number, elapsed_time);
+        printf("%"PRIu32",%"PRIu64"\n", event_number, elapsed_time);
         event_number++; // only after event initialization
-
-        if (event_number == EVENT_NUMBER_MAX) {
-          // indicator for post-processing
-          printf("##### END\n");
-          break; // end the process
-        } 
       }
       gio_timestamp_prev = gio_timestamp;
       gio_triggered = 0; // clear the flag
-    } // end of if () for GPIO trigger
-  } // end of while () for event loop
+    }
+  }
 
   PROCESS_END();
 }
