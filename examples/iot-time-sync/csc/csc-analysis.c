@@ -27,7 +27,7 @@ PROCESS_THREAD(csc_analysis_process, ev, data)
     // experimental parameters
     csc_int_t D = 1000000; // corresponding to 1s
     int skew_max = 100; // skew bound in ppm
-    int N_samples = 1000; // Number of samples for D
+    int N_samples = 10000; // Number of samples for D
     csc_int_t is[] = {1000000, 10000000, 100000000, 1000000000};
     int N_is = sizeof(is) / sizeof(is[0]);
 
