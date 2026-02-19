@@ -32,15 +32,17 @@ DEFINES += CSC_DIV_OPT # turn off checking the value of A in division algos
 
 # experimental setup
 ### DEBUG
-# DEFINES += BEACON_INTERVAL=1 # beacon interval in seconds
-# DEFINES += NB_SKIP=10 # number of initial beacons to skip before CFR initialization
-# DEFINES += NB_CFR=100 # number of beacons for CFR initialization
-# DEFINES += EVENT_NUMBER_MAX=100 # maximum number of events to process after CFR initialization
-### DEBUG
-DEFINES += BEACON_INTERVAL=10 # beacon interval in seconds
+DEFINES += BEACON_INTERVAL=1 # beacon interval in seconds
+DEFINES += EVENT_NUMBER_MAX=1000 # maximum number of events to process after CFR initialization
+DEFINES += NB_CFR=20 # number of beacons for CFR initialization
 DEFINES += NB_SKIP=10 # number of initial beacons to skip before CFR initialization
-DEFINES += NB_CFR=100 # number of beacons for CFR initialization
-DEFINES += EVENT_NUMBER_MAX=100 # maximum number of events to process after CFR initialization
+DEFINES += RADIO_OFF_PERIOD=600 # period of radio off time after each beacon reception in seconds
+### ACTUAL
+# DEFINES += BEACON_INTERVAL=10 # beacon interval in seconds
+# DEFINES += EVENT_NUMBER_MAX=1000 # maximum number of events to process after CFR initialization
+# DEFINES += NB_CFR=100 # number of beacons for CFR initialization
+# DEFINES += NB_SKIP=10 # number of initial beacons to skip before CFR initialization
+# DEFINES += RADIO_OFF_PERIOD=600 # period of radio off time after each beacon reception in seconds
 
 CONTIKI = ../../..
 include $(CONTIKI)/Makefile.include

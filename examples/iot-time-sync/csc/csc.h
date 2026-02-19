@@ -3,9 +3,11 @@
 
 #if CSC_INT_SIZE == 4
 typedef int32_t csc_int_t;
+#define CSC_INT_MAX INT32_MAX
 #define CSC_INT_PRI PRId32
 #elif CSC_INT_SIZE == 8
 typedef int64_t csc_int_t;
+#define CSC_INT_MAX INT64_MAX
 #define CSC_INT_PRI PRId64
 #else
 #error Unsupported CSC_INT_SIZE
