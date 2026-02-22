@@ -20,11 +20,11 @@ PROCESS_THREAD(rtimer_ext_process, ev, data)
   etimer_set(&et, 5*CLOCK_SECOND); // initial delay
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
   printf("\n\n\n");
+  printf("##### BEGIN\n"); 
   printf("# Defined macros:\n");
 #ifdef RTIMER_EXT
   printf("# - RTIMER_EXT: For 32-bit extension\n");
 #endif
-  printf("##### BEGIN\n"); 
   printf("t,diff\n");
   prev = RTIMER_EXT_NOW();
   for (i = 0; i < 1000; i++) {
