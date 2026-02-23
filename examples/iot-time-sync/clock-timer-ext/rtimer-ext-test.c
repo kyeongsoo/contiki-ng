@@ -23,7 +23,7 @@ PROCESS_THREAD(rtimer_ext_process, ev, data)
   printf("##### BEGIN\n"); 
   printf("# Defined macros:\n");
 #ifdef RTIMER_EXT
-  printf("# - RTIMER_EXT: For 32-bit extension\n");
+  printf("# - RTIMER_EXT=%d: For 32-bit extension\n", RTIMER_EXT);
 #endif
   printf("t,diff\n");
   prev = RTIMER_EXT_NOW();
