@@ -77,7 +77,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
 
 #ifdef P2_EXT
   // GPIO trigger external variables
-  extern rtimer_ext_clock_t gio_timestamp;
+  extern volatile rtimer_ext_clock_t gio_timestamp;
   extern volatile uint8_t gio_triggered;
   static bool event_initialized = false;
   static uint32_t event_number = 0;

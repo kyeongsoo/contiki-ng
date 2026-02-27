@@ -76,8 +76,13 @@ typedef long off_t;
 /* Our clock resolution, this is the same as Unix HZ. */
 #define CLOCK_CONF_SECOND 128UL
 
+#ifdef RTIMER_EXT
+/* Use 32-bit rtimer (default in Contiki-NG is 32) */
+#define RTIMER_CONF_CLOCK_SIZE 4
+#else
 /* Use 16-bit rtimer (default in Contiki-NG is 32) */
 #define RTIMER_CONF_CLOCK_SIZE 2
+#endif
 
 typedef int spl_t;
 spl_t   splhigh_(void);

@@ -169,12 +169,35 @@ clock_init(void)
   /* Select ACLK 32768Hz clock */
   /* TACTL = TASSEL0 | TACLR; */
 
-#if INTERVAL==32768/CLOCK_SECOND
-  TACTL = TASSEL0 | TACLR;
-#elif INTERVAL==16384/CLOCK_SECOND
-  TACTL = TASSEL0 | TACLR | ID_1;
+
+#ifdef US_EXT // microsecond extension
+  //--------------------------------------------------------------------
+  // NOTE: TASSEL1 selects SMCLK, which, however, seems to runat 3.9 MHz
+  //       (=MSP430_CPU_SPEED) unlike the comments above.
+  //--------------------------------------------------------------------
+  // Based on 3.9 MHz SMCLK
+  #if INTERVAL==1950000/CLOCK_SECOND
+    TACTL = TASSEL1 | TACLR | ID_1; // divide by 2 (unstable!!!)
+  #elif INTERVAL==975000/CLOCK_SECOND
+    TACTL = TASSEL1 | TACLR | ID_2; // divide by 4 (experimental!)
+  #elif INTERVAL==487500/CLOCK_SECOND
+    TACTL = TASSEL1 | TACLR | ID_3; // divide by 8
+  // Based on 32.768 kHz ACLK
+  #elif INTERVAL==32768/CLOCK_SECOND
+    TACTL = TASSEL0 | TACLR;
+  #elif INTERVAL==16384/CLOCK_SECOND
+    TACTL = TASSEL0 | TACLR | ID_1;
+  #else
+    #error NEED TO UPDATE clock.c to match interval!
+  #endif
 #else
-#error NEED TO UPDATE clock.c to match interval!
+  #if INTERVAL==32768/CLOCK_SECOND
+    TACTL = TASSEL0 | TACLR;
+  #elif INTERVAL==16384/CLOCK_SECOND
+    TACTL = TASSEL0 | TACLR | ID_1;
+  #else
+  #error NEED TO UPDATE clock.c to match interval!
+  #endif
 #endif
 
   /* Initialize ccr1 to create the X ms interval. */
@@ -245,11 +268,21 @@ clock_seconds(void)
 rtimer_clock_t
 clock_counter(void)
 {
+#ifdef RTIMER_EXT
+  rtimer_clock_t t1, t2;
+  // to prevent race condition
+  do {
+    t1 = (uint32_t)rtimer_high_bits << 16 | TAR;
+    t2 = (uint32_t)rtimer_high_bits << 16 | TAR;
+  } while (t1 !=t2);
+  return t1;
+#else
   rtimer_clock_t t1, t2;
   do {
     t1 = TAR;
     t2 = TAR;
   } while(t1 != t2);
   return t1;
+#endif
 }
 /*---------------------------------------------------------------------------*/

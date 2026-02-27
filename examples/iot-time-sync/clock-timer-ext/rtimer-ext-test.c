@@ -14,7 +14,7 @@ PROCESS_THREAD(rtimer_ext_process, ev, data)
 
   const int period = 0.1 * CLOCK_SECOND;
   static struct etimer et;
-  static rtimer_ext_clock_t now = 0, prev = 0;
+  static rtimer_clock_t now = 0, prev = 0;
   static int i;
 
   etimer_set(&et, 5*CLOCK_SECOND); // initial delay
@@ -26,12 +26,12 @@ PROCESS_THREAD(rtimer_ext_process, ev, data)
   printf("# - RTIMER_EXT=%d: For 32-bit extension\n", RTIMER_EXT);
 #endif
   printf("t,diff\n");
-  prev = RTIMER_EXT_NOW();
+  prev = RTIMER_NOW();
   for (i = 0; i < 1000; i++) {
       etimer_set(&et, period);
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-      now = RTIMER_EXT_NOW();
-      printf("%"RTIMER_PRI_EXT",%"RTIMER_PRI_EXT"\n", now, now-prev);
+      now = RTIMER_NOW();
+      printf("%"RTIMER_PRI",%"RTIMER_PRI"\n", now, now-prev);
       prev = now;
   }
   printf("##### END\n");

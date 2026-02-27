@@ -42,7 +42,23 @@
 
 #include "sys/rtimer.h"
 
-#define RTIMER_ARCH_SECOND (4096U*8)
+#ifdef US_EXT // microsecond extension
+   #if US_EXT == 8
+      #define RTIMER_ARCH_SECOND 487500UL // MCLK / 8
+   #elif US_EXT == 4
+      #define RTIMER_ARCH_SECOND 975000UL // MCLK / 4 (experimental!)
+   #elif US_EXT == 2
+      #define RTIMER_ARCH_SECOND 1950000UL // MCLK / 2 (unstable!!!)
+   #else
+      #error "Unsupported US_EXT value. Supported values are 8, 4, and 2."
+      /* #define RTIMER_ARCH_SECOND 1228800ULL */
+      /* #define RTIMER_ARCH_SECOND 1048576UL */
+      /* #define RTIMER_ARCH_SECOND 307200UL */
+      /* #define RTIMER_ARCH_SECOND 131072UL */
+   #endif
+#else
+   #define RTIMER_ARCH_SECOND (4096U*8)
+#endif
 
 /* Do the math in 32bits to save precision.
  * Round to nearest integer rather than truncate. */
@@ -61,7 +77,6 @@
 rtimer_clock_t rtimer_arch_now(void);
 #ifdef RTIMER_EXT
 volatile rtimer_clock_t rtimer_high_bits;
-rtimer_ext_clock_t rtimer_ext_arch_now(void);
 #endif
 
 #endif /* RTIMER_ARCH_H_ */
