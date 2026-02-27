@@ -12,10 +12,10 @@ This fork, therefore, extends Contiki-NG to provide enhanced and new capabilitie
 * GPIO support for detecting external trigger:
   - P2_EXT=6: Rising edge detection and timestamping at P2.6 (GIO3) (stable)
   - P2_EXT=3: Rising edge detection and timestamping at P2.3 (GIO2) (working)
-  - P2_EXT=1: Rising edge detection and timestamping at P2.1 (GIO1) (experimental)
+  - P2_EXT=1: Rising edge detection and timestamping at P2.3 (GIO2) (experimental)
 * 32-bit extension of rtimer:
   - RTIMER_EXT
 * Microsecnd resolution extension of rtimer based on SMCLK running at 3.9 MHz:
-  - US_EXT=8: 0.4875 MHz (divide by 8)
-  - US_EXT=4: 0.975 MHz (divide by 4; experimental)
-  - US_EXT=2: 1.95 MHz (divide by 2; unstable!!!)
+  - US_EXT=8: 0.4875 MHz (SMCLK divided by 8)
+  - US_EXT=4: 0.975 MHz (SMCLK divided by 4; experimental)
+  - US_EXT=2: 1.95 MHz (SMCLK divided by 2; unstable!!!)
