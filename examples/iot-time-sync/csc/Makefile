@@ -20,10 +20,10 @@ DEFINES += LOG_CONF_LEVEL_SKY=0
 DEFINES += NULLNET_EXT=1
 
 # GPIO extensions for edge detection and timestamping
-DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GIO3) (stable)
-# DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GIO2) (working)
-# DEFINES += P2_EXT=1 # edge detection and timestamping at P2.1 (GIO1) (experimental)
-# DEFINES += P2_EXT=0 # edge detection and timestamping at P2.0 (GIO0) (not working!!!)
+DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GPIO3) (stable)
+# DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GPIO2) (working)
+# DEFINES += P2_EXT=1 # edge detection and timestamping at P2.1 (GPIO1) (experimental)
+# DEFINES += P2_EXT=0 # edge detection and timestamping at P2.0 (GPIO0) (not working!!!)
 
 # Rtimer extensions for 32-bit extended rtimer and microsecond-level timing
 DEFINES += RTIMER_EXT # 32-bit extended rtimer

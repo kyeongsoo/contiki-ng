@@ -18,11 +18,11 @@ AUTOSTART_PROCESSES(&rtimer_ext_calibration_process);
 PROCESS_THREAD(rtimer_ext_calibration_process, ev, data)
 {
   // GPIO trigger external variables
-  extern volatile rtimer_clock_t gio_timestamp;
-  extern volatile uint8_t gio_triggered;
+  extern volatile rtimer_clock_t gpio_timestamp;
+  extern volatile uint8_t gpio_triggered;
 
   static bool event_initialized = false;
-  static rtimer_clock_t gio_timestamp_prev = 0;
+  static rtimer_clock_t gpio_timestamp_prev = 0;
   static uint32_t event_number = 0;
   static uint32_t iet = 0; // inter-event time
 
@@ -34,25 +34,25 @@ PROCESS_THREAD(rtimer_ext_calibration_process, ev, data)
   while (event_number < 1000) {
     PROCESS_WAIT_EVENT();
 
-    if (ev == PROCESS_EVENT_POLL && gio_triggered == true) {
+    if (ev == PROCESS_EVENT_POLL && gpio_triggered == true) {
       if (event_initialized == false) {
         event_initialized = true;
-        LOG_INFO("t=%"RTIMER_PRI": Detect 1st event through GIO\n", gio_timestamp);
+        LOG_INFO("t=%"RTIMER_PRI": Detect 1st event through GPIO\n", gpio_timestamp);
         printf("##### BEGIN\n");
       }
       else {
         // handle timestamp wraparound
-        if (gio_timestamp < gio_timestamp_prev) {
-          iet = (uint32_t)gio_timestamp + (RTIMER_CLOCK_MAX - gio_timestamp_prev);
+        if (gpio_timestamp < gpio_timestamp_prev) {
+          iet = (uint32_t)gpio_timestamp + (RTIMER_CLOCK_MAX - gpio_timestamp_prev);
         } else {
-          iet = (uint32_t)(gio_timestamp - gio_timestamp_prev);
+          iet = (uint32_t)(gpio_timestamp - gpio_timestamp_prev);
         }
         printf("event_number=%"PRIu32",t=%"RTIMER_PRI",iet=%"PRIu32",elapsed_us=%"PRIu64"\n",
-          event_number, gio_timestamp, iet, 1000000*(uint64_t)iet/RTIMER_SECOND);
+          event_number, gpio_timestamp, iet, 1000000*(uint64_t)iet/RTIMER_SECOND);
       }
       event_number++;
-      gio_timestamp_prev = gio_timestamp;
-      gio_triggered = 0; // clear the flag
+      gpio_timestamp_prev = gpio_timestamp;
+      gpio_triggered = 0; // clear the flag
     }
   }
   printf("##### END\n");

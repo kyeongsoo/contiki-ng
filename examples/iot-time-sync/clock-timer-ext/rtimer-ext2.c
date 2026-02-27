@@ -8,8 +8,8 @@
 // #define P2_PIN  (1 << P2_EXT)
 
 /* Link to the variables in button-sensor.c */
-extern rtimer_ext_clock_t gio_timestamp;
-extern volatile uint8_t gio_triggered;
+extern rtimer_ext_clock_t gpio_timestamp;
+extern volatile uint8_t gpio_triggered;
 
 /*---------------------------------------------------------------------------*/
 PROCESS(gpio_trigger_process, "GPIO Trigger Process");
@@ -47,17 +47,17 @@ PROCESS_THREAD(gpio_trigger_process, ev, data)
     PROCESS_WAIT_EVENT();
 
     /* CASE A: Our Pin 6 actually worked! */
-    if(ev == PROCESS_EVENT_POLL && gio_triggered == 1) {
+    if(ev == PROCESS_EVENT_POLL && gpio_triggered == 1) {
       printf(">>> SUCCESS: P2.%d (Jumper) Triggered the ISR directly!\n", P2_EXT);
 #ifdef RTIMER_EXT
-      printf("Captured 32-bit timestamp: %10"RTIMER_PRI_EXT"\n", gio_timestamp);
+      printf("Captured 32-bit timestamp: %10"RTIMER_PRI_EXT"\n", gpio_timestamp);
 #else
-      printf("Captured 16-bit timestamp: %5"RTIMER_PRI_EXT"\no", gio_timestamp);
+      printf("Captured 16-bit timestamp: %5"RTIMER_PRI_EXT"\no", gpio_timestamp);
 #endif
       // printf("Captured P2IFG: 0x%02X\n", debug_flags);
       // printf("Captured P2SEL: 0x%02X\n", debug_sel);
       // printf("Captured P2DIR: 0x%02X\n", debug_dir);
-      gio_triggered = 0;
+      gpio_triggered = 0;
       // leds_off(LEDS_RED);
     }
 
@@ -97,12 +97,12 @@ PROCESS_THREAD(gpio_trigger_process, ev, data)
 //         printf("Result: Bit 6 Flag is MISSING.\n");
 //       }
 
-//       if (gio_triggered == 1) {
-//           printf("Edge detected on P2.6 at %u\n", (unsigned)gio_timestamp);
+//       if (gpio_triggered == 1) {
+//           printf("Edge detected on P2.6 at %u\n", (unsigned)gpio_timestamp);
 //           leds_toggle(LEDS_GREEN);
 //           printf("P2IE:  0x%02X (Current logic P2IE value)\n", P2IE);
 //           printf("P2IN:  0x%02X (Current logic levels on all Port 2 pins)\n", P2IN);  
-//           gio_triggered = 0; // clear the flag
+//           gpio_triggered = 0; // clear the flag
 
 
 //       }
