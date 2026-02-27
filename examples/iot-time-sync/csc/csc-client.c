@@ -38,7 +38,7 @@
 // shared data between the main process and the input callback function
 static bool beacon_received = false;
 static csc_data_t nn_data = {0, 0}; // for storing the received beacon data
-static rtimer_ext_clock_t rx_timestamp = 0;
+static rtimer_clock_t rx_timestamp = 0;
 
 PROCESS(csc_client_process, "A client for CSC experiments");
 #ifdef P2_EXT
@@ -49,7 +49,7 @@ AUTOSTART_PROCESSES(&csc_client_process);
 void input_callback(const void *data, uint16_t len, const linkaddr_t *src,
   const linkaddr_t *dest)
 {
-  rx_timestamp = RTIMER_EXT_NOW();
+  rx_timestamp = RTIMER_NOW();
   LOG_DBG("Receive a beacon\n");
 
   if(len == sizeof(csc_data_t)) {
@@ -71,14 +71,14 @@ PROCESS_THREAD(csc_client_process, ev, data)
   static csc_int_t iat = 0; // interarrival time
   static csc_int_t idt = 0; // interdeparture time
   static uint16_t num_iter = 0; // ignored in this experiment
-  static rtimer_ext_clock_t rx_timestamp_prev = 0;
-  static rtimer_ext_clock_t tx_timestamp = 0;
-  static rtimer_ext_clock_t tx_timestamp_prev = 0;
+  static rtimer_clock_t rx_timestamp_prev = 0;
+  static rtimer_clock_t tx_timestamp = 0;
+  static rtimer_clock_t tx_timestamp_prev = 0;
 
 #ifdef P2_EXT
   // GPIO trigger external variables
-  extern rtimer_ext_clock_t gio_timestamp;
-  extern volatile uint8_t gio_triggered;
+  extern volatile rtimer_clock_t gpio_timestamp;
+  extern volatile uint8_t gpio_triggered;
   static bool event_initialized = false;
   static uint32_t event_number = 0;
   static csc_int_t elapsed_time = 0; // elapsed time since CFR initialization
@@ -86,7 +86,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
   static csc_int_t rst_ds; // result of CSC based on double-precision FP division
   static csc_int_t rst_sp; // result of CSC based on single-precision FP division
   static csc_int_t diff;
-  static rtimer_ext_clock_t gio_timestamp_prev = 0;
+  static rtimer_clock_t gpio_timestamp_prev = 0;
 #endif
 
   PROCESS_BEGIN();
@@ -103,12 +103,12 @@ PROCESS_THREAD(csc_client_process, ev, data)
     switch (ev) {
       case PROCESS_EVENT_POLL:
 #ifdef P2_EXT
-        if (gio_triggered == true) {
+        if (gpio_triggered == true) {
           // process GPIO trigger at P2.x
           if (cfr_initialized == true) {
             if (event_initialized == false) {
               event_initialized = true;
-              LOG_INFO("t=%"RTIMER_PRI_EXT": Detect 1st event after CFR initialization\n", gio_timestamp);
+              LOG_INFO("t=%"RTIMER_PRI": Detect 1st event after CFR initialization\n", gpio_timestamp);
 
               // post-processing indicator and header row for column names in CSV format
               printf("##### BEGIN\n"); 
@@ -116,17 +116,17 @@ PROCESS_THREAD(csc_client_process, ev, data)
             }
             else {
               // handle timestamp wraparound
-              if (gio_timestamp < gio_timestamp_prev) {
-                iet = (csc_int_t)gio_timestamp + (RTIMER_EXT_CLOCK_MAX - gio_timestamp_prev);
+              if (gpio_timestamp < gpio_timestamp_prev) {
+                iet = (csc_int_t)gpio_timestamp + (RTIMER_CLOCK_MAX - gpio_timestamp_prev);
               } else {
-                iet = (csc_int_t)(gio_timestamp - gio_timestamp_prev);
+                iet = (csc_int_t)(gpio_timestamp - gpio_timestamp_prev);
               }
               elapsed_time += iet;
               rst_ds = csc_ds(elapsed_time, D, A, &num_iter);
               rst_sp = csc_sp(elapsed_time, D, A, &num_iter);
               diff = rst_ds - rst_sp;
-              LOG_DBG("t=%"RTIMER_PRI_EXT": event_number=%"PRIu32", elapsed_time=%"CSC_INT_PRI", D=%"CSC_INT_PRI", A=%"CSC_INT_PRI"\n",
-                gio_timestamp, event_number, elapsed_time, D, A);
+              LOG_DBG("t=%"RTIMER_PRI": event_number=%"PRIu32", elapsed_time=%"CSC_INT_PRI", D=%"CSC_INT_PRI", A=%"CSC_INT_PRI"\n",
+                gpio_timestamp, event_number, elapsed_time, D, A);
 
               // data row in CSV format
               printf("%"PRIu32",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI"\n",
@@ -140,8 +140,8 @@ PROCESS_THREAD(csc_client_process, ev, data)
               }
               
             } // end of else for "event_initialized == true"
-            gio_timestamp_prev = gio_timestamp;
-            gio_triggered = 0; // clear the flag
+            gpio_timestamp_prev = gpio_timestamp;
+            gpio_triggered = 0; // clear the flag
           } // end of if() for "cfr_initialized == true"
         } else if (beacon_received == true) {
 #else
@@ -153,25 +153,25 @@ PROCESS_THREAD(csc_client_process, ev, data)
           num_beacons++;
           if (cfr_initialized == false) {
             if (num_beacons <= NB_SKIP) {
-              LOG_INFO("Skip a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT", rx_ts=%"RTIMER_PRI_EXT", num_beacons=%"PRIu32"\n",
+              LOG_INFO("Skip a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI", rx_ts=%"RTIMER_PRI", num_beacons=%"PRIu32"\n",
                 seq_num, tx_timestamp, rx_timestamp, num_beacons);
             }
             else {
               // handle timestamp wraparound and update 'A' and 'D'
               if (rx_timestamp < rx_timestamp_prev) {
-                iat = (csc_int_t)rx_timestamp + (RTIMER_EXT_CLOCK_MAX - rx_timestamp_prev);
+                iat = (csc_int_t)rx_timestamp + (RTIMER_CLOCK_MAX - rx_timestamp_prev);
               } else {
                 iat = (csc_int_t)(rx_timestamp - rx_timestamp_prev);
               }
               if (tx_timestamp < tx_timestamp_prev) {
-                idt = (csc_int_t)tx_timestamp + (RTIMER_EXT_CLOCK_MAX - tx_timestamp_prev);
+                idt = (csc_int_t)tx_timestamp + (RTIMER_CLOCK_MAX - tx_timestamp_prev);
               } else {
                 idt = (csc_int_t)(tx_timestamp - tx_timestamp_prev);
               }
               assert((A + iat <= CSC_INT_MAX) && (D + idt <= CSC_INT_MAX)); // to prevent overflow
               A += iat;
               D += idt;
-              LOG_INFO("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT", rx_ts=%"RTIMER_PRI_EXT", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
+              LOG_INFO("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI", rx_ts=%"RTIMER_PRI", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
                 nn_data.seq_num, tx_timestamp, rx_timestamp, num_beacons, A, D);
               if (num_beacons == (NB_SKIP + NB_CFR)) {
                 cfr_initialized = true;
@@ -183,19 +183,19 @@ PROCESS_THREAD(csc_client_process, ev, data)
           } else {
             // handle timestamp wraparound and update 'A' and 'D'
             if (rx_timestamp < rx_timestamp_prev) {
-              iat = (csc_int_t)rx_timestamp + (RTIMER_EXT_CLOCK_MAX - rx_timestamp_prev);
+              iat = (csc_int_t)rx_timestamp + (RTIMER_CLOCK_MAX - rx_timestamp_prev);
             } else {
               iat = (csc_int_t)(rx_timestamp - rx_timestamp_prev);
             }
             if (tx_timestamp < tx_timestamp_prev) {
-              idt = (csc_int_t)tx_timestamp + (RTIMER_EXT_CLOCK_MAX - tx_timestamp_prev);
+              idt = (csc_int_t)tx_timestamp + (RTIMER_CLOCK_MAX - tx_timestamp_prev);
             } else {
               idt = (csc_int_t)(tx_timestamp - tx_timestamp_prev);
             }
             assert((A + iat <= CSC_INT_MAX) && (D + idt <= CSC_INT_MAX)); // to prevent overflow
             A += iat;
             D += idt;
-            LOG_DBG("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI_EXT", rx_ts=%"RTIMER_PRI_EXT", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
+            LOG_DBG("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI", rx_ts=%"RTIMER_PRI", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
                     nn_data.seq_num, tx_timestamp, rx_timestamp, num_beacons, A, D);
             NETSTACK_RADIO.off(); // to minimize interference with GPIO trigger
             etimer_set(&periodic_timer, RADIO_OFF_PERIOD*CLOCK_SECOND);

@@ -87,7 +87,7 @@ stack_check_init(void)
 #if defined __GNUC__ && __GNUC__ >= 13
 #pragma GCC diagnostic pop
 #endif
-
+  
   /* Note: this is expected to be called before the WDT is started! */
   p = &_stack;
   while(p < (uint8_t *)stack_top) {

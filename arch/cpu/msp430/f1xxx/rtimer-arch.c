@@ -52,6 +52,7 @@
 #define PRINTF(...)
 #endif
 
+
 /*---------------------------------------------------------------------------*/
 ISR(TIMERA0, timera0)
 {
@@ -81,36 +82,44 @@ rtimer_arch_init(void)
 rtimer_clock_t
 rtimer_arch_now(void)
 {
+#ifdef RTIMER_EXT
+  /* rtimer_clock_t t1, t2; */
+  /* // to prevent race condition */
+  /* do { */
+  /*   t1 = (uint32_t)rtimer_high_bits << 16 | TAR; */
+  /*   t2 = (uint32_t)rtimer_high_bits << 16 | TAR; */
+  /* } while (t1 != t2); */
+  /* return t1; */
+  uint16_t h1, h2, l;
+  // to prevent race condition
+  do {
+    h1 = rtimer_high_bits;
+    l = TAR;
+    h2 = rtimer_high_bits;
+  } while (h1 != h2);
+  return ((uint32_t)h1 << 16) | l;
+#else
   rtimer_clock_t t1, t2;
   do {
     t1 = TAR;
     t2 = TAR;
   } while(t1 != t2);
   return t1;
-}
-/*---------------------------------------------------------------------------*/
-#ifdef RTIMER_EXT
-rtimer_ext_clock_t
-rtimer_ext_arch_now(void)
-{
-  rtimer_clock_t h1, h2, l;
-  // Strategy to prevent race condition during overflow:
-  // Read high, then low, then high bits again. If high changed, re-read.
-  do {
-    h1 = rtimer_high_bits;
-    l = TAR;
-    // l = RTIMER_NOW();
-    h2 = rtimer_high_bits;
-  } while (h1 != h2);
-  return ((uint32_t)h1 << 16) | l;
-}
-/*---------------------------------------------------------------------------*/
 #endif
+}
+/*---------------------------------------------------------------------------*/
 void
 rtimer_arch_schedule(rtimer_clock_t t)
 {
+#ifdef RTIMER_EXT
+  // N.B.: Only lower 16 bits can be scheduled due to the 16-bit hardware timer.
+  PRINTF("rtimer_arch_schedule time %u\n", t & 0xFFFF);
+  // rtimer_high_bits = t >> 16;
+  TACCR0 = t & 0xFFFF;
+#else
   PRINTF("rtimer_arch_schedule time %u\n", t);
 
   TACCR0 = t;
+#endif
 }
 /*---------------------------------------------------------------------------*/

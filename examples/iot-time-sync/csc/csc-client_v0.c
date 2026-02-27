@@ -35,8 +35,8 @@ static rtimer_ext_clock_t tx_timestamp_prev = 0;
 
 #ifdef P2_EXT
 // GPIO trigger external variables
-extern rtimer_ext_clock_t gio_timestamp;
-extern volatile uint8_t gio_triggered;
+extern rtimer_ext_clock_t gpio_timestamp;
+extern volatile uint8_t gpio_triggered;
 
 static bool event_initialized = false;
 static uint32_t event_number = 0;
@@ -46,7 +46,7 @@ static uint64_t iet = 0ULL; // inter-event time
 static csc_int_t rst_ds; // result of CSC based on double-precision FP division
 static csc_int_t rst_sp; // result of CSC based on single-precision FP division
 static csc_int_t diff;
-static rtimer_ext_clock_t gio_timestamp_prev = 0;
+static rtimer_ext_clock_t gpio_timestamp_prev = 0;
 #endif
 
 PROCESS(csc_client_process, "A client for CSC experiments");
@@ -118,11 +118,11 @@ PROCESS_THREAD(csc_client_process, ev, data)
 
 #ifdef P2_EXT
     // process GPIO trigger at P2.x
-    if(ev == PROCESS_EVENT_POLL && gio_triggered == 1) {
+    if(ev == PROCESS_EVENT_POLL && gpio_triggered == 1) {
       if (cfr_initialized == true) {
         if (event_initialized == false) {
           event_initialized = true;
-          LOG_INFO("t=%"RTIMER_PRI_EXT": Detect 1st event after CFR initialization\n", gio_timestamp);
+          LOG_INFO("t=%"RTIMER_PRI_EXT": Detect 1st event after CFR initialization\n", gpio_timestamp);
 
           // post-processing indicator and header row for column names in CSV format
           printf("##### BEGIN\n"); 
@@ -130,17 +130,17 @@ PROCESS_THREAD(csc_client_process, ev, data)
         }
         else {
           // handle timestamp wraparound
-          if (gio_timestamp < gio_timestamp_prev) {
-            iet = (csc_int_t)gio_timestamp + (RTIMER_EXT_CLOCK_MAX - gio_timestamp_prev);
+          if (gpio_timestamp < gpio_timestamp_prev) {
+            iet = (csc_int_t)gpio_timestamp + (RTIMER_EXT_CLOCK_MAX - gpio_timestamp_prev);
           } else {
-            iet = (csc_int_t)(gio_timestamp - gio_timestamp_prev);
+            iet = (csc_int_t)(gpio_timestamp - gpio_timestamp_prev);
           }
           elapsed_time += iet;
           rst_ds = csc_ds(elapsed_time, D, A, &num_iter);
           rst_sp = csc_sp(elapsed_time, D, A, &num_iter);
           diff = rst_ds - rst_sp;
           LOG_DBG("t=%"RTIMER_PRI_EXT": elapsed_time=%"CSC_INT_PRI", D=%"CSC_INT_PRI", A=%"CSC_INT_PRI"\n",
-            gio_timestamp, elapsed_time, D, A);
+            gpio_timestamp, elapsed_time, D, A);
 
           // data row in CSV format
           printf("%"PRIu32",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI"\n",
@@ -150,8 +150,8 @@ PROCESS_THREAD(csc_client_process, ev, data)
           // TBD: terminate the experiment and print end indicator
           
         } // end of else for "event_initialized == true"
-        gio_timestamp_prev = gio_timestamp;
-        gio_triggered = 0; // clear the flag
+        gpio_timestamp_prev = gpio_timestamp;
+        gpio_triggered = 0; // clear the flag
       } // end of if() for "cfr_initialized == true"
     } // end of if() for event handling
 #endif
