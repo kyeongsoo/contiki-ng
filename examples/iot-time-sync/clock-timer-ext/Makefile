@@ -5,7 +5,7 @@ MAKE_MAC = MAKE_MAC_CSMA
 MAKE_NET = MAKE_NET_NULLNET
 
 # GPIO extensions for edge detection and timestamping
-# DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GPIO3) (stable)
+DEFINES += P2_EXT=6 # edge detection and timestamping at P2.6 (GPIO3) (stable)
 # DEFINES += P2_EXT=3 # edge detection and timestamping at P2.3 (GPIO2) (working)
 # DEFINES += P2_EXT=1 # edge detection and timestamping at P2.1 (GPIO1) (experimental)
 # DEFINES += P2_EXT=0 # edge detection and timestamping at P2.0 (GPIO0) (not working!!)
