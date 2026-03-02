@@ -43,9 +43,8 @@ def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, en
     targets = logging.StreamHandler(sys.stdout), logging.FileHandler(file_name)
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=targets)
 
-
-    input("Press enter to generate triggering events: ")
     print("Generating events ... ")
+    sleep(2) # initial delay
 
     # post-processing indicator and header row for column names in CSV format
     logging.info("##### BEGIN");
@@ -68,8 +67,8 @@ def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, en
         event_number += 1
 
     logging.info("##### END");
-    input("Press enter to exit: ")
-    print("Event generation is terminated.")
+    # input("Press enter to exit: ")
+    # print("Event generation is terminated.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
