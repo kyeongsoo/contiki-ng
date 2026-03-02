@@ -14,6 +14,10 @@ import argparse
 import logging
 import random
 import sys
+import warnings
+warnings.filterwarnings("ignore", module="gpiozero")
+# ignore warnings from gpiozero about the lack of lgpio and RPi
+# modules, which are not available on non-Raspberry Pi platforms.
 from datetime import datetime
 from gpiozero import LED
 from time import sleep
@@ -44,7 +48,7 @@ def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, en
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=targets)
 
     print("Generating events ... ")
-    sleep(2) # initial delay
+    # sleep(2) # initial delay
 
     # post-processing indicator and header row for column names in CSV format
     logging.info("##### BEGIN");

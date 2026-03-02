@@ -22,8 +22,8 @@
 // #define LOG_LEVEL LOG_LEVEL_DBG
 
 // experimental setup
-#ifndef EVENT_NUMBER_MAX
-#define EVENT_NUMBER_MAX 1000 // maximum number of events to process after CFR initialization
+#ifndef ELAPSED_TIME_MAX
+#define ELAPSED_TIME_MAX 3600 // maximum elapsed time in seconds after CFR initialization
 #endif
 #ifndef NB_CFR
 #define NB_CFR 100 // number of beacons for CFR initialization
@@ -133,7 +133,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
                 event_number, elapsed_time, D, A, rst_ds, rst_sp, diff);
               event_number++; // only after event initialization
               
-              if (event_number == EVENT_NUMBER_MAX) {
+              if ((elapsed_time / RTIMER_SECOND) > ELAPSED_TIME_MAX) {
                 // indicator for post-processing
                 printf("##### END\n");
                 PROCESS_EXIT(); // exit the process

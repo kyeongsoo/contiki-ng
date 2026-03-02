@@ -55,7 +55,7 @@ defines = {
     "CSC_DIV_OPT": 1, # turn off checking the value of A in division algos
     # experimental setup
     "BEACON_INTERVAL": 10, # beacon interval in seconds
-    "EVENT_NUMBER_MAX": 1000, # maximum number of events to process after CFR initialization
+    "ELAPSED_TIME_MAX": 3600, # maximum elapsed time in seconds after CFR initialization
     "NB_CFR": 100, # number of beacons for CFR initialization
     "NB_SKIP": 10, # number of initial beacons to skip before CFR initialization
     "RADIO_OFF_PERIOD": 600 # period of radio off time after each beacon reception in seconds
@@ -74,7 +74,9 @@ working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 
 # customize contiki-ng DEFINES macro
 # DEBUG
-defines["EVENT_NUMBER_MAX"] = 20
+defines["US_EXT"] = 4 # 0.975 MHz (SMCLK divided by 4; experimental)
+defines["BEACON_INTERVAL"] = 1 # beacon interval in seconds
+defines["ELAPSED_TIME_MAX"] = 30 # maximum elapsed time in seconds after CFR initialization
 defines["NB_CFR"] = 20
 defines["NB_SKIP"] = 10
 defines["RADIO_OFF_PERIOD"] = 60
@@ -83,9 +85,13 @@ defines["RADIO_OFF_PERIOD"] = 60
 # processes to run in the container for TelosB motes
 defines_str = "".join([f"DEFINES+={k}={v} " for k, v in defines.items()])
 commands = [
+    # clean
     "make -f Makefile.client-server clean",
-    "make -f Makefile.client-server MOTES=/dev/ttyUSB0 csc-server.upload",
-    # "make -f Makefile.client-server MOTES=/dev/ttyUSB1 csc-client.upload"
+    # build and upload csc-server
+    "make -f Makefile.client-server "
+    + defines_str
+    + "MOTES=/dev/ttyUSB0 csc-server.upload",
+    # build and upload csc-client
     "make -f Makefile.client-server "
     + defines_str
     + "MOTES=/dev/ttyUSB1 csc-client.upload"
