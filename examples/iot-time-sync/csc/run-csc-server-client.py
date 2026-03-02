@@ -17,6 +17,7 @@
 #           You must not remove this notice, or any other, from this software.
 #
 
+import datetime
 import docker
 import os
 import re
@@ -111,8 +112,12 @@ for command in commands:
         print(line)
         sys.stdout.flush()
 
+# datetime string for monitoring logs
+now = datetime.datetime.now()
+datetime_string = now.strftime("%Y%m%d%H%M%S")
+
 # monitoring process for the server
-command = "serialdump /dev/ttyUSB0 | tee ./log/csc-server_$(date +'%Y%m%d%H%M%S').log"
+command = "serialdump /dev/ttyUSB0 | tee ./log/csc-server_" + datatime_string + ".log"
 print(f"[LOG: main] {command}")
 process_server = subprocess.Popen(
     command,
@@ -131,7 +136,7 @@ process_server = subprocess.Popen(
 
 # monitoring process for the client, which also trigger the event
 # generation on the remote Raspberry Pi
-command = "serialdump /dev/ttyUSB1 | tee ./log/csc-client_$(date +'%Y%m%d%H%M%S').log"
+command = "serialdump /dev/ttyUSB1 | tee ./log/csc-client_" + datetime_string + ".log"
 print(f"[LOG: main] {command}")
 process_client = subprocess.Popen(
     command,
