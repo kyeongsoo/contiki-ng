@@ -5,10 +5,14 @@ from time import sleep
 # set up GPIO input and output
 led = LED(17, initial_value=False)
 
-# input("Press enter to generate triggering events: ")
-print("Generating events ... ")
-for i in range(100):  # Generate 10 triggering events
+print("Generating timing signals ... ")
+sleep(2) # initial delay
+
+# generate timing signals with the 1st one triggering the calibration
+# process at a target node
+for i in range(101):  
     led.on()
     sleep(0.5)
     led.off()
     sleep(0.5)
+print("Completed timing signal generation.")

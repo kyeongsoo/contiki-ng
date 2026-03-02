@@ -32,7 +32,7 @@ PROCESS_THREAD(rtimer_ext_calibration_process, ev, data)
   SENSORS_ACTIVATE(button_sensor);
 
   printf("Now ready for triggers\n");
-  while (event_number < 100) {
+  while (event_number <= 100) {
     PROCESS_WAIT_EVENT();
 
     if (ev == PROCESS_EVENT_POLL && gpio_triggered == true) {
