@@ -74,11 +74,11 @@ working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 
 # customize contiki-ng DEFINES macro
 # DEBUG
-defines["BEACON_INTERVAL"] = 1 # beacon interval in seconds
-defines["ELAPSED_TIME_MAX"] = 600 # maximum elapsed time in seconds after CFR initialization
+defines["BEACON_INTERVAL"] = 10 # beacon interval in seconds
+defines["ELAPSED_TIME_MAX"] = 1800 # maximum elapsed time in seconds after CFR initialization
 defines["NB_CFR"] = 20
 defines["NB_SKIP"] = 10
-defines["RADIO_OFF_PERIOD"] = 60
+defines["RADIO_OFF_PERIOD"] = 100
 # DEBUG
 
 # processes to run in the container for TelosB motes
@@ -163,7 +163,7 @@ while True:
                 "python", "../tools/event_generation.py",
                 "--interarrival_time", "10.0",
                 "--on_period", "0.1",
-                "--end_time", "610.0", # with a guard time of 10 s
+                "--end_time", "1900.0", # with a guard time of 100 s
                 "--datetime_string", datetime_string
             ], # DEBUG
             env=custom_env,
