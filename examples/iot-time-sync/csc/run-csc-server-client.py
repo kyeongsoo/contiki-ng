@@ -110,7 +110,7 @@ for command in commands:
         print(line)
         sys.stdout.flush()
 
-# datetime string for monitoring logs
+# datetime string for log file names
 now = datetime.datetime.now()
 datetime_string = now.strftime("%Y%m%d%H%M%S")
 
@@ -159,12 +159,12 @@ while True:
         print("[LOG: main] Start event generation on the remote Raspberry Pi ...")
         # run as a background process to avoid blocking the main process
         process = subprocess.Popen(
-            # ["python", "../tools/event_generation.py"],
             [
                 "python", "../tools/event_generation.py",
                 "--interarrival_time", "10.0",
                 "--on_period", "0.1",
-                "--end_time", "610.0" # with a guard time of 10 s
+                "--end_time", "610.0", # with a guard time of 10 s
+                "--datetime_string", datetime_string
             ], # DEBUG
             env=custom_env,
             stdout=subprocess.PIPE,

@@ -27,7 +27,7 @@ from time import sleep
 led = LED(17, initial_value=False)
 
 
-def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, end_time: float = 3600.0):
+def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, end_time: float = 3600.0, datetime_string: str = ""):
     if interarrival_time <= on_period:
             print("Warning: interarrival time should be greater than on period.")
             sys.exit(1)
@@ -41,9 +41,10 @@ def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, en
     # Posted by Adam, modified by community. See post 'Timeline' for change history
     # Retrieved 2026-02-17, License - CC BY-SA 3.0
     ####################################################################
-    now = datetime.now()
-    timestamp = now.strftime("%Y%m%d%H%M%S")
-    file_name = f"./log/event_generation_{timestamp}.log"
+    if datetime_string == "":
+        now = datetime.now()
+        datetime_string = now.strftime("%Y%m%d%H%M%S")
+    file_name = f"./log/event_generation_{datetime_string}.log"
     targets = logging.StreamHandler(sys.stdout), logging.FileHandler(file_name)
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=targets)
 
@@ -94,15 +95,22 @@ if __name__ == "__main__":
         help="end time of event generation [s]; default is 3600.0 (1 hour)",
         default=3600.0,
         type=float)
+    parser.add_argument(
+        "-D",
+        "--datetime_string",
+        help="datetime string for log file name; default is empty string (\"\")",
+        default="",
+        type=str)
     args = parser.parse_args()
 
     # set variables using command-line arguments
     interarrival_time = args.interarrival_time
     on_period = args.on_period
     end_time = args.end_time
+    datetime_string = args.datetime_string
 
     # set random seed for reproducibility
     random.seed(12345)
 
     # generate events
-    generate_events(interarrival_time, on_period, end_time)
+    generate_events(interarrival_time, on_period, end_time, datetime_string)
