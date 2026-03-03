@@ -1,3 +1,7 @@
+import warnings
+warnings.filterwarnings("ignore", module="gpiozero")
+# ignore warnings from gpiozero about the lack of lgpio and RPi
+# modules, which are not available on non-Raspberry Pi platforms.
 from gpiozero import LED
 from time import sleep
 

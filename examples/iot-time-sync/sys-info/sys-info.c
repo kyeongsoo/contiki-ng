@@ -42,10 +42,17 @@ PROCESS_THREAD(sys_info_process, ev, data)
     printf("##### BEGIN #####\n");
     printf("# Defined macros:\n");
 #ifdef RTIMER_EXT
-    printf("# - RTIMER_EXT=%d: For 32-bit extension\n", RTIMER_EXT);
-#endif
-#ifdef US_EXT
-    printf("# - US_EXT=%d: For faster rtimer extension\n", US_EXT);
+    #if RTIMER_EXT == 1
+    printf("# - RTIMER_EXT=1: 32-bit rtimer running at 32.768 kHz (32.768 kHz ACLK driven by crystal; default)\n");
+    #elif RTIMER_EXT == 2
+    printf("# - RTIMER_EXT=2: 32-bit rtimer running at 0.4875 MHz (3.9 MHz SMCLK divided by 8; stable)\n");
+    #elif RTIMER_EXT == 3
+    printf("# - RTIMER_EXT=3: 32-bit rtimer running at 0.975 MHz (3.9 MHz SMCLK divided by 4; experimental)\n");
+    #elif RTIMER_EXT == 4
+    printf("# - RTIMER_EXT=4: 32-bit rtimer running at 1.95 MHz (3.9 MHz SMCLK divided by 2; unstable!!!)\n");
+    #else
+        #error "Unsupported RTIMER_EXT value. Supported values are 1, 2, 3, and 4."
+    #endif
 #endif
     printf("link address size: %d\n", (unsigned) LINKADDR_SIZE);
     /* printf("link address: %s\n", linkaddr_node_addr.u8); */

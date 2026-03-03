@@ -170,7 +170,7 @@ clock_init(void)
   /* TACTL = TASSEL0 | TACLR; */
 
 
-#ifdef US_EXT // microsecond extension
+#ifdef RTIMER_EXT
   //--------------------------------------------------------------------
   // NOTE: TASSEL1 selects SMCLK, which, however, seems to runat 3.9 MHz
   //       (=MSP430_CPU_SPEED) unlike the comments above.

@@ -44,9 +44,8 @@ defines = {
     "NULLNET_EXT": 1,
     # GPIO extensions for edge detection and timestamping
     "P2_EXT": 6, # edge detection and timestamping at P2.6 (GPIO3) (stable)
-    # Rtimer extensions for 32-bit extended rtimer and microsecond-level timing
-    "RTIMER_EXT": 1, # 32-bit extended rtimer
-    "US_EXT": 8, # 0.4875 MHz (SMCLK divided by 8)
+    # Rtimer extensions
+    "RTIMER_EXT": 3, # 32-bit rtimer running at 0.975 MHz (3.9 MHz SMCLK divided by 4; experimental)
     # CSC optimization
     "NDEBUG": 1, # turn off assert()
     # CSC optimization
@@ -75,7 +74,6 @@ working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 
 # customize contiki-ng DEFINES macro
 # DEBUG
-defines["US_EXT"] = 4 # 0.975 MHz (SMCLK divided by 4; experimental)
 defines["BEACON_INTERVAL"] = 1 # beacon interval in seconds
 defines["ELAPSED_TIME_MAX"] = 600 # maximum elapsed time in seconds after CFR initialization
 defines["NB_CFR"] = 20
@@ -117,7 +115,7 @@ now = datetime.datetime.now()
 datetime_string = now.strftime("%Y%m%d%H%M%S")
 
 # monitoring process for the server
-command = "serialdump /dev/ttyUSB0 | tee ./log/csc-server_" + datatime_string + ".log"
+command = "serialdump /dev/ttyUSB0 | tee ./log/csc-server_" + datetime_string + ".log"
 print(f"[LOG: main] {command}")
 process_server = subprocess.Popen(
     command,

@@ -42,15 +42,15 @@
 
 #include "sys/rtimer.h"
 
-#ifdef US_EXT // microsecond extension
-   #if US_EXT == 8
-      #define RTIMER_ARCH_SECOND 487500UL // MCLK / 8
-   #elif US_EXT == 4
-      #define RTIMER_ARCH_SECOND 975000UL // MCLK / 4 (experimental!)
-   #elif US_EXT == 2
+#if RTIMER_EXT > 1
+   #if RTIMER_EXT == 2
+      #define RTIMER_ARCH_SECOND 487500UL // MCLK / 8 (stable)
+   #elif RTIMER_EXT == 3
+      #define RTIMER_ARCH_SECOND 975000UL // MCLK / 4 (experimental)
+   #elif RTIMER_EXT == 4
       #define RTIMER_ARCH_SECOND 1950000UL // MCLK / 2 (unstable!!!)
    #else
-      #error "Unsupported US_EXT value. Supported values are 8, 4, and 2."
+      #error "Unsupported RTIMER_EXT value. Supported values are 1, 2, 3, and 4."
       /* #define RTIMER_ARCH_SECOND 1228800ULL */
       /* #define RTIMER_ARCH_SECOND 1048576UL */
       /* #define RTIMER_ARCH_SECOND 307200UL */
