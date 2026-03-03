@@ -22,9 +22,6 @@ from io import StringIO
 from pathlib import Path
 
 
-RTIMER_SECOND = 32768 # number of rtimer ticks per second for sky/TelosB platform in contiki-ng
-
-
 def log_to_string(log_file: str):
     """Prefilter and convert a log file to a single string."""
     filtered_lines = []
@@ -56,17 +53,24 @@ if __name__ == "__main__":
         help="server log file name",
         default="csc-server.log",
         type=str)
+    parser.add_argument(
+        "-r",
+        "--rtimer_second",
+        help="the number of rtimer ticks per second for sky/TelosB platform in contiki-ng; default is 975000 (i.e., 0.975 MHz)",
+        default=975000,
+        type=int)
     arg = parser.parse_args()
     client_log_file = arg.client_log_file
     server_log_file = arg.server_log_file
+    rtimer_second = arg.rtimer_second
 
     df_c = pd.read_csv(StringIO(log_to_string(client_log_file)), header=0)
     df_s = pd.read_csv(StringIO(log_to_string(server_log_file)), header=0)
     df = pd.merge(df_s, df_c, on=['event_number'], how='inner')
-    df['elapsed_second'] = df['elapsed_ticks'] / RTIMER_SECOND
-    df['i_err'] = (df['i'] - df['elapsed_ticks']) / RTIMER_SECOND
-    df['ds_err'] = (df['ds'] - df['elapsed_ticks']) / RTIMER_SECOND
-    df['sp_err'] = (df['sp'] - df['elapsed_ticks']) / RTIMER_SECOND
+    df['elapsed_second'] = df['elapsed_ticks'] / rtimer_second  
+    df['i_err'] = (df['i'] - df['elapsed_ticks']) / rtimer_second
+    df['ds_err'] = (df['ds'] - df['elapsed_ticks']) / rtimer_second
+    df['sp_err'] = (df['sp'] - df['elapsed_ticks']) / rtimer_second
 
     # save the dataframe to a pickle file for later use
     pkl_file = Path(client_log_file).with_suffix("").with_suffix(".pkl")
