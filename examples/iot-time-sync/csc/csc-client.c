@@ -195,7 +195,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
             assert((A + iat <= CSC_INT_MAX) && (D + idt <= CSC_INT_MAX)); // to prevent overflow
             A += iat;
             D += idt;
-            LOG_DBG("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI", rx_ts=%"RTIMER_PRI", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
+            LOG_INFO("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI", rx_ts=%"RTIMER_PRI", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
                     nn_data.seq_num, tx_timestamp, rx_timestamp, num_beacons, A, D);
             NETSTACK_RADIO.off(); // to minimize interference with GPIO trigger
             etimer_set(&periodic_timer, RADIO_OFF_PERIOD*CLOCK_SECOND);

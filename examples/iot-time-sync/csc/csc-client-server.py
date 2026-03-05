@@ -16,6 +16,7 @@
 #
 
 import argparse
+import json
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import StringIO
@@ -32,7 +33,10 @@ def log_to_string(log_file: str):
                 if "##### BEGIN" in line:
                     cvs_start = True
             else:
-                if "##### END" in line:
+                if "[INFO: CSC-Client]" in line:
+                    # skip
+                    continue
+                elif "##### END" in line:
                     cvs_start = False
                 else:
                     filtered_lines.append(line.strip())
@@ -74,13 +78,21 @@ if __name__ == "__main__":
     pkl_file = Path(*parts)
     df.to_pickle(pkl_file)
 
+    json_file = f"{log_folder}/csc-client-server_settings.json"
+    with open(json_file, "r") as f:
+        settings = json.load(f)
     md_file = pkl_file.with_suffix("").with_suffix(".md")
     alg_names = {"i": "Uncompensated", "ds": "Compensated (Direct Search)", "sp": "Compensated (Single-Precision Division)"}
     pd.set_option('display.float_format', '{:.4e}'.format)
     with open(md_file, "w") as f:
+        f.write("# CSC Client and Server Settings\n")
+        for k, v in settings.items():
+            f.write(f"- {k}: {v}\n")
         for alg in ['ds', 'sp']:
-            f.write("# " + alg_names[alg] + "\n")
-            f.write(df[alg + '_err'].describe().to_string() + "\n")
+            f.write(f"# {alg_names[alg]} Error\n")
+            for k, v in df[alg + '_err'].describe().items():
+                f.write(f"- {k}: {v:.4e}\n")
+            # f.write(df[alg + '_err'].describe().to_string() + "\n")
 
     pdf_file = md_file.with_suffix("").with_suffix(".pdf")
     xmin = df['elapsed_second'].min()
