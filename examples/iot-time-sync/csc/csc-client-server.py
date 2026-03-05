@@ -42,16 +42,10 @@ def log_to_string(log_file: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-c",
-        "--client_log_file",
-        help="client log file name",
-        default="csc-client.log",
-        type=str)
-    parser.add_argument(
-        "-s",
-        "--server_log_file",
-        help="server log file name",
-        default="csc-server.log",
+        "-L",
+        "--log_folder",
+        help="folder for a log file; default is './log'",
+        default="",
         type=str)
     parser.add_argument(
         "-r",
@@ -59,11 +53,12 @@ if __name__ == "__main__":
         help="the number of rtimer ticks per second for sky/TelosB platform in contiki-ng; default is 975000 (i.e., 0.975 MHz)",
         default=975000,
         type=int)
-    arg = parser.parse_args()
-    client_log_file = arg.client_log_file
-    server_log_file = arg.server_log_file
-    rtimer_second = arg.rtimer_second
+    args = parser.parse_args()
+    log_folder = args.log_folder.strip('/') # remove any trailing slash
+    rtimer_second = args.rtimer_second
 
+    client_log_file = f"{log_folder}/csc-client.log"
+    server_log_file = f"{log_folder}/csc-server.log"
     df_c = pd.read_csv(StringIO(log_to_string(client_log_file)), header=0)
     df_s = pd.read_csv(StringIO(log_to_string(server_log_file)), header=0)
     df = pd.merge(df_s, df_c, on=['event_number'], how='inner')

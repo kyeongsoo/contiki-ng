@@ -74,13 +74,21 @@ working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 
 # customize contiki-ng DEFINES macro
 # DEBUG
-defines["CSC_INT_SIZE"] = 8 # number of bytes for 'i', 'D', and 'A'
-defines["BEACON_INTERVAL"] = 10 # beacon interval in seconds
-defines["ELAPSED_TIME_MAX"] = 3600 # maximum elapsed time in seconds after CFR initialization
-defines["NB_CFR"] = 20
-defines["NB_SKIP"] = 10
-defines["RADIO_OFF_PERIOD"] = 100
+# defines["CSC_INT_SIZE"] = 8 # number of bytes for 'i', 'D', and 'A'
+# defines["BEACON_INTERVAL"] = 10 # beacon interval in seconds
+# defines["ELAPSED_TIME_MAX"] = 3600 # maximum elapsed time in seconds after CFR initialization
+# defines["NB_CFR"] = 20
+# defines["NB_SKIP"] = 10
+# defines["RADIO_OFF_PERIOD"] = 100
 # DEBUG
+# TEST
+defines["CSC_INT_SIZE"] = 8 # number of bytes for 'i', 'D', and 'A'
+defines["BEACON_INTERVAL"] = 1 # beacon interval in seconds
+defines["ELAPSED_TIME_MAX"] = 60 # maximum elapsed time in seconds after CFR initialization
+defines["NB_CFR"] = 2
+defines["NB_SKIP"] = 1
+defines["RADIO_OFF_PERIOD"] = 100
+# TEST
 
 # processes to run in the container for TelosB motes
 defines_str = "".join([f"DEFINES+={k}={v} " for k, v in defines.items()])
@@ -111,12 +119,19 @@ for command in commands:
         print(line)
         sys.stdout.flush()
 
-# datetime string for log file names
+# datetime string for a directory for log files
 now = datetime.datetime.now()
 datetime_string = now.strftime("%Y%m%d%H%M%S")
+try:
+    os.mkdir("./log/" + datetime_string)
+except FileExistsError:
+    print(f"[LOG: main] Directory './log/{datetime_string}' already exists. Log files will be overwritten.")
+except Exception as e:
+    print(f"[LOG: main] ERROR: Failed to create directory './log/{datetime_string}': {e}")
+    sys.exit(1)
 
 # monitoring process for the server
-command = "serialdump /dev/ttyUSB0 | tee ./log/csc-server_" + datetime_string + ".log"
+command = "serialdump /dev/ttyUSB0 | tee ./log/" + datetime_string + "/csc-server.log"
 print(f"[LOG: main] {command}")
 process_server = subprocess.Popen(
     command,
@@ -135,7 +150,7 @@ process_server = subprocess.Popen(
 
 # monitoring process for the client, which also trigger the event
 # generation on the remote Raspberry Pi
-command = "serialdump /dev/ttyUSB1 | tee ./log/csc-client_" + datetime_string + ".log"
+command = "serialdump /dev/ttyUSB1 | tee ./log/" + datetime_string + "/csc-client.log"
 print(f"[LOG: main] {command}")
 process_client = subprocess.Popen(
     command,
@@ -160,13 +175,20 @@ while True:
         print("[LOG: main] Start event generation on the remote Raspberry Pi ...")
         # run as a background process to avoid blocking the main process
         process = subprocess.Popen(
+            # [
+            #     "python", "../tools/event_generation.py",
+            #     "--interarrival_time", "10.0",
+            #     "--on_period", "0.1",
+            #     "--end_time", "3700.0", # with a guard time of 100 s
+            #     "--datetime_string", datetime_string
+            # ], # DEBUG
             [
                 "python", "../tools/event_generation.py",
-                "--interarrival_time", "10.0",
+                "--interarrival_time", "1.0",
                 "--on_period", "0.1",
-                "--end_time", "3700.0", # with a guard time of 100 s
-                "--datetime_string", datetime_string
-            ], # DEBUG
+                "--end_time", "70.0", # with a guard time of 10 s
+                "--log_folder", f"./log/{datetime_string}"
+            ], # TEST
             env=custom_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

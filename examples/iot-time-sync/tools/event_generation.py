@@ -18,7 +18,6 @@ import warnings
 warnings.filterwarnings("ignore", module="gpiozero")
 # ignore warnings from gpiozero about the lack of lgpio and RPi
 # modules, which are not available on non-Raspberry Pi platforms.
-from datetime import datetime
 from gpiozero import LED
 from time import sleep
 
@@ -27,7 +26,7 @@ from time import sleep
 led = LED(17, initial_value=False)
 
 
-def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, end_time: float = 3600.0, datetime_string: str = ""):
+def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, end_time: float = 3600.0, log_folder: str = "./log"):
     if interarrival_time <= on_period:
             print("Warning: interarrival time should be greater than on period.")
             sys.exit(1)
@@ -41,10 +40,7 @@ def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, en
     # Posted by Adam, modified by community. See post 'Timeline' for change history
     # Retrieved 2026-02-17, License - CC BY-SA 3.0
     ####################################################################
-    if datetime_string == "":
-        now = datetime.now()
-        datetime_string = now.strftime("%Y%m%d%H%M%S")
-    file_name = f"./log/event_generation_{datetime_string}.log"
+    file_name = f"{log_folder}/event_generation.log"
     targets = logging.StreamHandler(sys.stdout), logging.FileHandler(file_name)
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=targets)
 
@@ -96,9 +92,9 @@ if __name__ == "__main__":
         default=3600.0,
         type=float)
     parser.add_argument(
-        "-D",
-        "--datetime_string",
-        help="datetime string for log file name; default is empty string (\"\")",
+        "-L",
+        "--log_folder",
+        help="folder for a log file; default is './log'",
         default="",
         type=str)
     args = parser.parse_args()
@@ -107,10 +103,10 @@ if __name__ == "__main__":
     interarrival_time = args.interarrival_time
     on_period = args.on_period
     end_time = args.end_time
-    datetime_string = args.datetime_string
+    log_folder = args.log_folder.strip('/') # remove any trailing slash
 
     # set random seed for reproducibility
-    random.seed(12345)
+    random.seed(20260217)
 
     # generate events
-    generate_events(interarrival_time, on_period, end_time, datetime_string)
+    generate_events(interarrival_time, on_period, end_time, log_folder)
