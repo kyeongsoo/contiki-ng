@@ -34,9 +34,8 @@ DEFINES += RTIMER_EXT=3 # 32-bit rtimer running at 0.975 MHz (3.9 MHz SMCLK divi
 # CSC optimization
 DEFINES += NDEBUG # turn off assert()
 DEFINES += CSC_INT_SIZE=4 # number of bytes for 'i', 'D', and 'A' (4 or 8)
-DEFINES += CSC_DS_OPT1=1 # turn off iteration couting in DS
-DEFINES += CSC_DS_OPT2 # enable branchless programming in DS
-DEFINES += CSC_DIV_OPT # turn off checking the value of A in division algos
+DEFINES += CSC_NO_ITER_COUNT=1 # turn off iteration couting in iterative algorithms
+DEFINES += CSC_NO_DIV_CHECK=1 # turn off checking the value of A in division algorithms
 
 CONTIKI = ../../..
 include $(CONTIKI)/Makefile.include

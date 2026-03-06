@@ -14,13 +14,15 @@
 #include "sys/log.h"
 #include "sys/rtimer.h"
 #include "csc-data.h"
+#include "csc.h"
 
 #define LOG_MODULE "CSC-Server"
-#define LOG_LEVEL LOG_LEVEL_INFO
+// #define LOG_LEVEL LOG_LEVEL_INFO
+#define LOG_LEVEL LOG_LEVEL_DBG
 
 // experimental setup
-#ifndef EVENT_NUMBER_MAX
-#define EVENT_NUMBER_MAX 1000 // maximum number of events to process after CFR initialization
+#ifndef ELAPSED_TIME_MAX
+#define ELAPSED_TIME_MAX 3600 // maximum elapsed time in seconds after CFR initialization
 #endif
 #ifndef BEACON_INTERVAL // beacon interval in seconds
 #ifdef RTIMER_EXT
@@ -36,7 +38,7 @@ extern volatile uint8_t gpio_triggered;
 
 static bool event_initialized = false;
 static uint32_t event_number = 0;
-static uint64_t elapsed_ticks = 0ULL;
+static csc_int_t elapsed_ticks = 0; // elapsed rtimer ticks since the detection of a 1st event
 static uint64_t iet = 0ULL; // inter-event ticks
 static rtimer_clock_t gpio_timestamp_prev = 0;
 
@@ -68,10 +70,10 @@ PROCESS_THREAD(csc_server_process, ev, data)
       nullnet_len = sizeof(nn_data);
       nn_data.timestamp = RTIMER_NOW();
       NETSTACK_NETWORK.output(NULL);
-      if (event_initialized == false) {
-        LOG_INFO("Send a beacon with seq_num=%"PRIu32", timestamp=%"RTIMER_PRI"\n",
-          nn_data.seq_num, nn_data.timestamp);
-      }
+      // if (event_initialized == false) {
+      LOG_INFO("Send a beacon with seq_num=%"PRIu32", timestamp=%"RTIMER_PRI"\n",
+        nn_data.seq_num, nn_data.timestamp);
+      // }
       nn_data.seq_num++;
       etimer_reset(&periodic_timer);
     }
@@ -94,17 +96,18 @@ PROCESS_THREAD(csc_server_process, ev, data)
           iet = (uint64_t)(gpio_timestamp - gpio_timestamp_prev);
         }
         elapsed_ticks += iet;
-        LOG_DBG("Event with timestamp=%"RTIMER_PRI", event_number=%"PRIu32", elapsed_ticks=%"PRIu64"\n",
+        LOG_DBG("Event with timestamp=%"RTIMER_PRI", event_number=%"PRIu32", elapsed_ticks=%"CSC_INT_PRI"\n",
           gpio_timestamp, event_number, elapsed_ticks);
-        printf("%"PRIu32",%"PRIu64"\n", event_number, elapsed_ticks);
-        event_number++; // only after event initialization
+        printf("%"PRIu32",%"CSC_INT_PRI"\n", event_number, elapsed_ticks);
 
-        if (event_number == EVENT_NUMBER_MAX) {
+        if ((elapsed_ticks / RTIMER_SECOND) > ELAPSED_TIME_MAX) {
           // indicator for post-processing
           printf("##### END\n");
+          LOG_DBG("t=%"RTIMER_PRI": End the process\n", RTIMER_NOW());
           break; // end the process
-        } 
+        }
       }
+      event_number++;
       gpio_timestamp_prev = gpio_timestamp;
       gpio_triggered = 0; // clear the flag
     } // end of if () for GPIO trigger

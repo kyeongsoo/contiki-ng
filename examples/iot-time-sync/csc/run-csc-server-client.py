@@ -32,8 +32,8 @@ from time import sleep
 custom_env = os.environ.copy()
 custom_env["PIGPIO_ADDR"] = "192.168.5.100"
 
-# set up default values for contiki-ng DEFINES macro
-defines = {
+# set up the default values of macros for contiki-ng and its extensions
+macros = {
     # disable TCP, UDP, and 6lowpan fragmentation
     "UIP_CONF_TCP": 0,
     "UIP_CONF_UDP": 0,
@@ -50,10 +50,9 @@ defines = {
     # CSC optimization
     "NDEBUG": 1, # turn off assert()
     # CSC optimization
-    "CSC_INT_SIZE": 4, # number of bytes for 'i', 'D', and 'A' (4 or 8)
-    "CSC_DS_OPT1": 1, # turn off iteration couting in DS
-    "CSC_DS_OPT2": 1, # enable branchless programming in DS
-    "CSC_DIV_OPT": 1, # turn off checking the value of A in division algos
+    "CSC_INT_SIZE": 8, # number of bytes for 'i', 'D', and 'A' (4 or 8)
+    "CSC_NO_ITER_COUNT": 1, # turn off iteration counting in iterative algorithms
+    "CSC_NO_DIV_CHECK": 1, # turn off checking the value of A in division algorithms
     # experimental setup
     "BEACON_INTERVAL": 10, # beacon interval in seconds
     "NB_SKIP": 10, # number of initial beacons to skip before CFR initialization
@@ -73,39 +72,39 @@ container_id = containers[0].id
 container = client.containers.get(container_id)
 working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 
-# customize contiki-ng DEFINES macro
-defines["CSC_INT_SIZE"] = 8 # number of bytes for 'i', 'D', and 'A'
+# customize macro values
 ########################################################################
 # DEBUG
 ########################################################################
-defines["BEACON_INTERVAL"] = 10 # beacon interval in seconds
-defines["NB_SKIP"] = 6 # 1 m
-defines["NB_CFR"] = 60 # 10 m
-defines["ELAPSED_TIME_MAX"] = 36000 # 10 h
-defines["RADIO_OFF_PERIOD"] = 3600 # 1 h
+# macros["BEACON_INTERVAL"] = 10 # beacon interval in seconds
+# macros["NB_SKIP"] = 6 # 1 m
+# macros["NB_CFR"] = 60 # 10 m
+# macros["ELAPSED_TIME_MAX"] = 36000 # 10 h
+# macros["RADIO_OFF_PERIOD"] = 3600 # 1 h
 ########################################################################
 # TEST
 ########################################################################
-# defines["BEACON_INTERVAL"] = 1 # beacon interval in seconds
-# defines["NB_SKIP"] = 1
-# defines["NB_CFR"] = 2
-# defines["ELAPSED_TIME_MAX"] = 360 # maximum elapsed time in seconds after CFR initialization
-# defines["RADIO_OFF_PERIOD"] = 60
+macros["BEACON_INTERVAL"] = 1 # beacon interval in seconds
+macros["NB_SKIP"] = 5
+macros["NB_CFR"] = 10
+macros["ELAPSED_TIME_MAX"] = 360 # 6 m
+macros["RADIO_OFF_PERIOD"] = 60
 
 # processes to run in the container for TelosB motes
-defines_str = "".join([f"DEFINES+={k}={v} " for k, v in defines.items()])
+macros_str = "".join([f"DEFINES+={k}={v} " for k, v in macros.items()])
 commands = [
     # clean
     "make -f Makefile.client-server clean",
     # build and upload csc-server
     "make -f Makefile.client-server "
-    + defines_str
+    + macros_str
     + "MOTES=/dev/ttyUSB0 csc-server.upload",
     # build and upload csc-client
     "make -f Makefile.client-server "
-    + defines_str
+    + macros_str
     + "MOTES=/dev/ttyUSB1 csc-client.upload"
     ]
+
 for command in commands:
     print(f"[LOG: main] {command}")
     exit_code, output_stream = container.exec_run(
@@ -132,10 +131,14 @@ except Exception as e:
     print(f"[LOG: main] ERROR: Failed to create directory './log/{datetime_string}': {e}")
     sys.exit(1)
 
-# save experiment settings to a JSON file for later use
+# save commands and macros to a JSON file for later use
+settings = {
+    "commands": commands,
+    "macros": macros
+}
 settings_file = f"./log/{datetime_string}/csc-client-server_settings.json"
-with open(settings_file, "w") as f:
-    json.dump(defines, f, sort_keys=True, indent=4)
+with open(settings_file, "w", encoding="utf-8") as f:
+    json.dump(settings, f, sort_keys=True, indent=4)
 
 # monitoring process for the server
 command = "serialdump /dev/ttyUSB0 | tee " + f"./log/{datetime_string}/csc-server.log"
@@ -181,19 +184,19 @@ while True:
     if match:
         print("[LOG: main] Start event generation on the remote Raspberry Pi ...")
         # run as a background process to avoid blocking the main process
-        process = subprocess.Popen(
+        process_event_generation = subprocess.Popen(
             [
                 "python", "../tools/event_generation.py",
                 "--interarrival_time", "10.0",
                 "--on_period", "0.1",
-                "--end_time", f"{int(defines['ELAPSED_TIME_MAX']*1.1)}", # with a guard time
+                "--end_time", f"{int(macros['ELAPSED_TIME_MAX']*1.1)}", # with a guard time
                 "--log_folder", f"./log/{datetime_string}"
             ], # DEBUG
             # [
             #     "python", "../tools/event_generation.py",
             #     "--interarrival_time", "1.0",
             #     "--on_period", "0.1",
-            #     "--end_time", f"{int(defines['ELAPSED_TIME_MAX']*1.1)}", # with a guard time
+            #     "--end_time", f"{int(macros['ELAPSED_TIME_MAX']*1.1)}", # with a guard time
             #     "--log_folder", f"./log/{datetime_string}"
             # ], # TEST
             env=custom_env,
@@ -220,7 +223,7 @@ while True:
                 print(f"[LOG: {process_to_kill}] {results.stdout}.")
 
 # check and print the output of the background process
-stdout, stderr = process.communicate()
+stdout, stderr = process_event_generation.communicate()
 for line in stdout.splitlines():
     print(f"[LOG: event_generation.py] {line}")
-process.terminate()
+process_event_generation.terminate()

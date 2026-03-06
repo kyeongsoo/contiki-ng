@@ -1,6 +1,6 @@
 # Makefile for debugging in a host Linux platform
 CC = gcc
-CFLAGS = -Wall -Wextra -g -DCSC_INT_SIZE=8 -DCSC_DS_OPT2=1 -DCSC_DIV_OPT=1
+CFLAGS = -Wall -Wextra -g -DCSC_INT_SIZE=8 -DCSC_NO_DIV_CHECK=1
 
 # Define the source files, object files, and the final executable name
 SOURCES1 = csc-debug1.c csc.c
@@ -12,9 +12,8 @@ TARGET2 = csc-debug2
 
 # optimize CSC implementation
 DEFINES += CSC_INT_SIZE=4 # number of bytes for 'i', 'D', and 'A' (4 or 8)
-# DEFINES += CSC_DS_OPT1=1 # turn off iteration couting in DS
-DEFINES += CSC_DS_OPT2=1 # enable branchless programming in DS
-DEFINES += CSC_DIV_OPT=1 # turn off checking the value of A in division algos
+# DEFINES += CSC_NO_ITER_COUNT=1 # turn off iteration couting in iterative algorithms
+DEFINES += CSC_NO_DIV_CHECK=1 # turn off checking the value of A in division algorithms
 
 # Default target: builds the program when 'make' is run
 all: $(TARGET1) $(TARGET2)

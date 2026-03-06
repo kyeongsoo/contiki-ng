@@ -5,9 +5,8 @@
  * 
  * \note The following options are controlled by macro definitions:
  * - CSC_INT_SIZE: The number of bytes for 'i', 'D', and 'A' (4 or 8).
- * - CSC_DS_OPT1: Turn off iteration couting in DS.
- * - CSC_DS_OPT2: Enable branchless programming in DS.
- * - CSC_DIV_OPT: Turn off checking the value of 'A' in division algorithms.
+ * - CSC_NO_ITER_COUNT: Turn off iteration couting in iterative algorithms.
+ * - CSC_NO_DIV_CHECK: Turn off checking the value of 'A' in division algorithms.
  */
 
 #include <assert.h>
@@ -29,7 +28,7 @@
 csc_int_t csc_dp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter)
 {
     *p_num_iter = 1;
-#ifndef CSC_DIV_OPT
+#ifndef CSC_NO_DIV_CHECK
     if (A == 0) {
         return 0;
     }
@@ -43,7 +42,7 @@ csc_int_t csc_dp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
 csc_int_t csc_sp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16_t *p_num_iter)
 {
     *p_num_iter = 1;
-#ifndef CSC_DIV_OPT
+#ifndef CSC_NO_DIV_CHECK
     if (A == 0) {
         return 0;
     }
@@ -65,14 +64,14 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
     csc_int_t td = (k - i)*A + i*(A - D); // "triangle down" to avoid overflow
     assert(td == k*A - i*D); // for debugging
 
-#ifdef CSC_DS_OPT1    
+#ifdef CSC_NO_ITER_COUNT    
     *p_num_iter = 1;
 #else
     *p_num_iter = 0;
 #endif
     if (td == 0) {
         j = k;
-#ifndef CSC_DS_OPT1
+#ifndef CSC_NO_ITER_COUNT
         (*p_num_iter)++;
 #endif
     }
@@ -80,7 +79,7 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
         while (true) {
             if (k == 0) {
                 j = 0;
-#ifndef CSC_DS_OPT1
+#ifndef CSC_NO_ITER_COUNT
                 (*p_num_iter)++;
 #endif
                 break;
@@ -88,7 +87,7 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
             else {
                 if (td - A == 0) {
                     j = k - 1;
-#ifndef CSC_DS_OPT1
+#ifndef CSC_NO_ITER_COUNT
                     (*p_num_iter)++;
 #endif
                     break;
@@ -96,22 +95,13 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
                 else if (td - A > 0) {
                     k--;
                     td -= A;
-#ifndef CSC_DS_OPT1
+#ifndef CSC_NO_ITER_COUNT
                     (*p_num_iter)++;
 #endif
                 }
                 else {
-#ifdef CSC_DS_OPT2
-                    j = k - (ABS(td - A) < ABS(td));
-#else
-                    if (ABS(td - A) < ABS(td)) {
-                        j = k - 1;
-                    }
-                    else {
-                        j = k;
-                    }
-#endif
-#ifndef CSC_DS_OPT1
+                    j = k - (ABS(td - A) < ABS(td)); // branchless programming
+#ifndef CSC_NO_ITER_COUNT
                     (*p_num_iter)++;
 #endif
                     break;
@@ -123,23 +113,14 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
         while (true) {
             if (td + A == 0) {
                 j = k + 1;
-#ifndef CSC_DS_OPT1
+#ifndef CSC_NO_ITER_COUNT
                 (*p_num_iter)++;
 #endif
                 break;
             }
             else if (td + A > 0) {
-#ifdef CSC_DS_OPT2
-                j = k + (ABS(td + A) < ABS(td));
-#else
-                if (ABS(td + A) < ABS(td)) {
-                    j = k + 1;
-                }
-                else {
-                    j = k;
-                }
-#endif
-#ifndef CSC_DS_OPT1
+                j = k + (ABS(td + A) < ABS(td)); // branchless programming
+#ifndef CSC_NO_ITER_COUNT
                 (*p_num_iter)++;
 #endif
                 break;
@@ -147,7 +128,7 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint16
             else {
                 k++;
                 td += A;
-#ifndef CSC_DS_OPT1
+#ifndef CSC_NO_ITER_COUNT
                 (*p_num_iter)++;
 #endif
             }

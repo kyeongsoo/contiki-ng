@@ -19,6 +19,7 @@ import argparse
 import json
 import matplotlib.pyplot as plt
 import pandas as pd
+import re
 from io import StringIO
 from pathlib import Path
 
@@ -33,7 +34,8 @@ def log_to_string(log_file: str):
                 if "##### BEGIN" in line:
                     cvs_start = True
             else:
-                if "[INFO: CSC-Client]" in line:
+                match = re.search(r"[DBG|[INFO", line)
+                if match:
                     # skip
                     continue
                 elif "##### END" in line:

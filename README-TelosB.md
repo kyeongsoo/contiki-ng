@@ -8,7 +8,8 @@ The support of TelosB in Contiki-NG is provided through sky platform, which, how
 
 This fork, therefore, extends Contiki-NG to provide enhanced and new capabilities with the following macro definitions:
 
-* Custom payload in NullNet.
+* Custom payload in NullNet:
+  - NULLNET_EXT=1
 * GPIO support for detecting external trigger:
   - P2_EXT=6: Rising edge detection and timestamping at P2.6 (GPIO3) (stable)
   - P2_EXT=3: Rising edge detection and timestamping at P2.3 (GPIO2) (working)
@@ -18,3 +19,4 @@ This fork, therefore, extends Contiki-NG to provide enhanced and new capabilitie
   - RTIMER_EXT=2: 32-bit rtimer running at 0.4875 MHz (3.9 MHz SMCLK divided by 8; stable)
   - RTIMER_EXT=3: 32-bit rtimer running at 0.975 MHz (3.9 MHz SMCLK divided by 4; experimental)
   - RTIMER_EXT=4: 32-bit rtimer running at 1.95 MHz (3.9 MHz SMCLK divided by 2; unstable!!!)
+  
