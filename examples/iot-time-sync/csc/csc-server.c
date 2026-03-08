@@ -21,8 +21,8 @@
 #define LOG_LEVEL LOG_LEVEL_DBG
 
 // experimental setup
-#ifndef ELAPSED_TIME_MAX
-#define ELAPSED_TIME_MAX 3600 // maximum elapsed time in seconds after CFR initialization
+#ifndef EVENT_NUMBER_MAX
+#define EVENT_NUMBER_MAX 1000 // maximum number of events to process after CFR initialization
 #endif
 #ifndef BEACON_INTERVAL // beacon interval in seconds
 #ifdef RTIMER_EXT
@@ -100,7 +100,7 @@ PROCESS_THREAD(csc_server_process, ev, data)
           gpio_timestamp, event_number, elapsed_ticks);
         printf("%"PRIu32",%"CSC_INT_PRI"\n", event_number, elapsed_ticks);
 
-        if ((elapsed_ticks / RTIMER_SECOND) > ELAPSED_TIME_MAX) {
+        if (event_number == EVENT_NUMBER_MAX) {
           // indicator for post-processing
           printf("##### END\n");
           LOG_DBG("t=%"RTIMER_PRI": End the process\n", RTIMER_NOW());

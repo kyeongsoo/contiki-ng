@@ -57,10 +57,21 @@ macros = {
     "BEACON_INTERVAL": 10, # beacon interval in seconds
     "NB_SKIP": 10, # number of initial beacons to skip before CFR initialization
     "NB_CFR": 100, # number of beacons for CFR initialization
-    "ELAPSED_TIME_MAX": 3600, # maximum elapsed time in seconds after CFR initialization
+    "EVENT_NUMBER_MAX": 720, # maximum number of events to process after CFR initialization; 2 h for 10 s event interarrival time
     "RADIO_OFF_PERIOD": 600 # period of radio off time after each beacon reception in seconds
 }
 
+
+# datetime string for a directory for log files
+now = datetime.datetime.now()
+datetime_string = now.strftime("%Y%m%d%H%M%S")
+try:
+    os.mkdir("./log/" + datetime_string)
+except FileExistsError:
+    print(f"[LOG: main] Directory './log/{datetime_string}' already exists. Log files will be overwritten.")
+except Exception as e:
+    print(f"[LOG: main] ERROR: Failed to create directory './log/{datetime_string}': {e}")
+    sys.exit(1)
 
 # set up for contiker docker container
 client = docker.from_env()
@@ -69,7 +80,11 @@ if not containers:
     print("[LOG: main] ERROR: No container found for contiker/contiki-ng")
     sys.exit(1)
 container_id = containers[0].id
-container = client.containers.get(container_id)
+if container_id is not None:
+    container = client.containers.get(container_id)
+else:
+    print("[LOG: main] ERROR: No container found for contiker/contiki-ng")
+    sys.exit(1)
 working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 
 # customize macro values
@@ -79,20 +94,20 @@ working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 # macros["BEACON_INTERVAL"] = 10 # beacon interval in seconds
 # macros["NB_SKIP"] = 6 # 1 m
 # macros["NB_CFR"] = 60 # 10 m
-# macros["ELAPSED_TIME_MAX"] = 36000 # 10 h
+# macros["EVENT_NUMBER_MAX"] = 720 # ~2 h for 10 s event interarrival time
 # macros["RADIO_OFF_PERIOD"] = 3600 # 1 h
 ########################################################################
 # TEST
 ########################################################################
-macros["BEACON_INTERVAL"] = 1 # beacon interval in seconds
-macros["NB_SKIP"] = 5
-macros["NB_CFR"] = 10
-macros["ELAPSED_TIME_MAX"] = 360 # 6 m
-macros["RADIO_OFF_PERIOD"] = 60
+macros["BEACON_INTERVAL"] = 10 # beacon interval in seconds
+macros["NB_SKIP"] = 6 # 1 m
+macros["NB_CFR"] = 180 # 30 m
+macros["EVENT_NUMBER_MAX"] = 720 # ~2 h for 1 s event interarrival time
+macros["RADIO_OFF_PERIOD"] = 0 # no radio off time for testing
 
-# processes to run in the container for TelosB motes
+# prepare commands for CSC on TelosB motes and event generation on a Raspberry Pi
 macros_str = "".join([f"DEFINES+={k}={v} " for k, v in macros.items()])
-commands = [
+csc_commands = [
     # clean
     "make -f Makefile.client-server clean",
     # build and upload csc-server
@@ -104,8 +119,27 @@ commands = [
     + macros_str
     + "MOTES=/dev/ttyUSB1 csc-client.upload"
     ]
+eg_command = [
+        "python", "../tools/event_generation.py",
+        "--on_period", "0.1",
+        "--log_folder", f"./log/{datetime_string}",
+        "--num_events", f"{int(macros['EVENT_NUMBER_MAX']+5)}", # should be greater than 'EVENT_NUMBER_MAX'
+        "--interarrival_time", "10.0" # DEBUG
+        # "--interarrival_time", "1.0" # TEST
+    ]
 
-for command in commands:
+# save commands and macros to a JSON file for later use
+settings = {
+    "csc_commands": csc_commands,
+    "eg_command": ' '.join(eg_command),
+    "macros": macros
+}
+settings_file = f"./log/{datetime_string}/csc-client-server_settings.json"
+with open(settings_file, "w", encoding="utf-8") as f:
+    json.dump(settings, f, sort_keys=True, indent=4)
+
+# processes to run in the container for TelosB motes
+for command in csc_commands:
     print(f"[LOG: main] {command}")
     exit_code, output_stream = container.exec_run(
         cmd=command,
@@ -120,43 +154,16 @@ for command in commands:
         print(line)
         sys.stdout.flush()
 
-# datetime string for a directory for log files
-now = datetime.datetime.now()
-datetime_string = now.strftime("%Y%m%d%H%M%S")
-try:
-    os.mkdir("./log/" + datetime_string)
-except FileExistsError:
-    print(f"[LOG: main] Directory './log/{datetime_string}' already exists. Log files will be overwritten.")
-except Exception as e:
-    print(f"[LOG: main] ERROR: Failed to create directory './log/{datetime_string}': {e}")
-    sys.exit(1)
-
-# save commands and macros to a JSON file for later use
-settings = {
-    "commands": commands,
-    "macros": macros
-}
-settings_file = f"./log/{datetime_string}/csc-client-server_settings.json"
-with open(settings_file, "w", encoding="utf-8") as f:
-    json.dump(settings, f, sort_keys=True, indent=4)
-
 # monitoring process for the server
-command = "serialdump /dev/ttyUSB0 | tee " + f"./log/{datetime_string}/csc-server.log"
+command = "serialdump /dev/ttyUSB0 > " + f"./log/{datetime_string}/csc-server.log"
 print(f"[LOG: main] {command}")
 process_server = subprocess.Popen(
     command,
     shell=True,
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT
-    # text=True
 )
-# while True:
-#     byte_line = process_server.stdout.readline()
-#     if not byte_line:
-#         break
-#     line = byte_line.decode('utf-8', errors='replace').strip()
-#     print(line.rstrip()) # Process or print the line in real-time
-#     sys.stdout.flush()
+print(f"[LOG: main] Started with PID={process_server.pid} ...")
 
 # monitoring process for the client, which also trigger the event
 # generation on the remote Raspberry Pi
@@ -167,11 +174,7 @@ process_client = subprocess.Popen(
     shell=True,
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT
-    # text=True
 )
-# for line in process_client.stdout:
-#     print(line.rstrip()) # Process or print the line in real-time
-#     sys.stdout.flush()
 while True:
     byte_line = process_client.stdout.readline()
     if not byte_line:
@@ -182,28 +185,15 @@ while True:
 
     match = re.search(r"CFR initialized:", line)
     if match:
-        print("[LOG: main] Start event generation on the remote Raspberry Pi ...")
-        # run as a background process to avoid blocking the main process
         process_event_generation = subprocess.Popen(
-            [
-                "python", "../tools/event_generation.py",
-                "--interarrival_time", "10.0",
-                "--on_period", "0.1",
-                "--end_time", f"{int(macros['ELAPSED_TIME_MAX']*1.1)}", # with a guard time
-                "--log_folder", f"./log/{datetime_string}"
-            ], # DEBUG
-            # [
-            #     "python", "../tools/event_generation.py",
-            #     "--interarrival_time", "1.0",
-            #     "--on_period", "0.1",
-            #     "--end_time", f"{int(macros['ELAPSED_TIME_MAX']*1.1)}", # with a guard time
-            #     "--log_folder", f"./log/{datetime_string}"
-            # ], # TEST
+            eg_command,
             env=custom_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            close_fds=True
         )
+        print(f"[LOG: main] Event generation on the remote Raspberry Pi started with PID={process_event_generation.pid} ...")
 
     match = re.search(r"##### END", line)
     if match:
@@ -222,8 +212,5 @@ while True:
             except subprocess.CalledProcessError:
                 print(f"[LOG: {process_to_kill}] {results.stdout}.")
 
-# check and print the output of the background process
-stdout, stderr = process_event_generation.communicate()
-for line in stdout.splitlines():
-    print(f"[LOG: event_generation.py] {line}")
-process_event_generation.terminate()
+# # terminate the event generation process
+# process_event_generation.terminate()

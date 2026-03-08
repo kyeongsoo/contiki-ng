@@ -22,8 +22,8 @@
 #define LOG_LEVEL LOG_LEVEL_DBG
 
 // experimental setup
-#ifndef ELAPSED_TIME_MAX
-#define ELAPSED_TIME_MAX 3600 // maximum elapsed time in seconds after CFR initialization
+#ifndef EVENT_NUMBER_MAX
+#define EVENT_NUMBER_MAX 1000 // maximum number of events to process after CFR initialization
 #endif
 #ifndef NB_CFR
 #define NB_CFR 100 // number of beacons for CFR initialization
@@ -48,7 +48,7 @@ void input_callback(const void *data, uint16_t len, const linkaddr_t *src,
   const linkaddr_t *dest)
 {
   rx_timestamp = RTIMER_NOW();
-  // LOG_DBG("Receive a beacon\n");
+  LOG_DBG("t=%"RTIMER_PRI": Receive a packet with len=%"PRIu16"\n", rx_timestamp, len);
 
   if(len == sizeof(csc_data_t)) {
     memcpy(&nn_data, data, sizeof(nn_data));
@@ -127,7 +127,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
               printf("%"PRIu32",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI"\n",
                 event_number, elapsed_ticks, D, A, rst_ds, rst_sp, diff);
 
-              if ((elapsed_ticks / RTIMER_SECOND) > ELAPSED_TIME_MAX) {
+              if (event_number == EVENT_NUMBER_MAX) {
                 // indicator for post-processing
                 printf("##### END\n");
                 LOG_DBG("t=%"RTIMER_PRI": Exit the process\n", RTIMER_NOW());
@@ -168,8 +168,11 @@ PROCESS_THREAD(csc_client_process, ev, data)
               if (num_beacons == (NB_SKIP + NB_CFR)) {
                 cfr_initialized = true;
                 LOG_INFO("CFR initialized: A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n", A, D);
+#if RADIO_OFF_PERIOD > 0
                 NETSTACK_RADIO.off(); // to minimize interference with GPIO trigger
+                LOG_DBG("t=%"RTIMER_PRI": Turn off the radio\n", RTIMER_NOW());
                 etimer_set(&periodic_timer, RADIO_OFF_PERIOD*CLOCK_SECOND);
+#endif
               }
             }
           } else {
@@ -189,9 +192,11 @@ PROCESS_THREAD(csc_client_process, ev, data)
             D += idt;
             LOG_INFO("Receive a beacon with seq_num=%"PRIu32", tx_ts=%"RTIMER_PRI", rx_ts=%"RTIMER_PRI", num_beacons=%"PRIu32", A=%"CSC_INT_PRI", D=%"CSC_INT_PRI"\n",
                     nn_data.seq_num, tx_timestamp, rx_timestamp, num_beacons, A, D);
+#if RADIO_OFF_PERIOD > 0
             NETSTACK_RADIO.off(); // to minimize interference with GPIO trigger
             LOG_DBG("t=%"RTIMER_PRI": Turn off the radio\n", RTIMER_NOW());
             etimer_set(&periodic_timer, RADIO_OFF_PERIOD*CLOCK_SECOND);
+#endif
           }
 
           rx_timestamp_prev = rx_timestamp;
@@ -201,8 +206,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
         break;
       case PROCESS_EVENT_TIMER:
         if (data == &periodic_timer) {
-          // turn on the radio to update CFR based on a new beacon
-          NETSTACK_RADIO.on();
+          NETSTACK_RADIO.on(); // to update CFR based on a new beacon
           LOG_DBG("t=%"RTIMER_PRI": Turn on the radio\n", RTIMER_NOW());
         }
         break;

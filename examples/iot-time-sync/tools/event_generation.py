@@ -26,7 +26,7 @@ from time import sleep
 led = LED(17, initial_value=False)
 
 
-def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, end_time: float = 3600.0, log_folder: str = "./log"):
+def generate_events(interarrival_time: float = 1.0, on_period: float = 0.1, num_events: int = 360, log_folder: str = "./log"):
     if interarrival_time <= on_period:
             print("Warning: interarrival time should be greater than on period.")
             sys.exit(1)
@@ -52,32 +52,31 @@ def generate_events(interarrival_time: float = 360.0, on_period: float = 0.1, en
     logging.info("event_number,current_time")
 
     current_time = 0.0
-    event_number = 0
+    # event_number = 0
 
     # main loop
-    while True:
+    for event_number in range(num_events):
         led.off()
         ia_time = random.expovariate(arrival_rate)
-        if (current_time + ia_time > end_time):
-            break
+        # if (current_time + ia_time > end_time):
+        #     break
         sleep(ia_time)
         led.on()
         sleep(on_period) # rising edge duration
         current_time += ia_time + on_period
         logging.info(f"{event_number},{current_time:.4E}")
-        event_number += 1
+        # event_number += 1
 
     logging.info("##### END");
-    # input("Press enter to exit: ")
-    # print("Event generation is terminated.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-I",
         "--interarrival_time",
-        help="average interarrival time of events [s]; default is 360.0 (0.1 hours)",
-        default=360.0,
+        help="average interarrival time of events [s]; default is 1.0",
+        default=1.0,
         type=float)
     parser.add_argument(
         "-O",
@@ -86,11 +85,11 @@ if __name__ == "__main__":
         default=0.1,
         type=float)
     parser.add_argument(
-        "-E",
-        "--end_time",
-        help="end time of event generation [s]; default is 3600.0 (1 hour)",
-        default=3600.0,
-        type=float)
+        "-N",
+        "--num_events",
+        help="number of events to generate; default is 360",
+        default=360,
+        type=int)
     parser.add_argument(
         "-L",
         "--log_folder",
@@ -102,11 +101,11 @@ if __name__ == "__main__":
     # set variables using command-line arguments
     interarrival_time = args.interarrival_time
     on_period = args.on_period
-    end_time = args.end_time
+    num_events = args.num_events
     log_folder = args.log_folder.strip('/') # remove any trailing slash
 
     # set random seed for reproducibility
     random.seed(20260217)
 
     # generate events
-    generate_events(interarrival_time, on_period, end_time, log_folder)
+    generate_events(interarrival_time, on_period, num_events, log_folder)

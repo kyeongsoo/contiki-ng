@@ -34,7 +34,7 @@ def log_to_string(log_file: str):
                 if "##### BEGIN" in line:
                     cvs_start = True
             else:
-                match = re.search(r"[DBG|[INFO", line)
+                match = re.search(r"\[DBG|\[INFO", line)
                 if match:
                     # skip
                     continue
@@ -72,6 +72,9 @@ if __name__ == "__main__":
     df['i_err'] = (df['i'] - df['elapsed_ticks']) / rtimer_second
     df['ds_err'] = (df['ds'] - df['elapsed_ticks']) / rtimer_second
     df['sp_err'] = (df['sp'] - df['elapsed_ticks']) / rtimer_second
+    df['i_abs_err'] = abs(df['i'] - df['elapsed_ticks']) / rtimer_second
+    df['ds_abs_err'] = abs(df['ds'] - df['elapsed_ticks']) / rtimer_second
+    df['sp_abs_err'] = abs(df['sp'] - df['elapsed_ticks']) / rtimer_second
 
     # save the dataframe to a pickle file for later use
     pkl_file = Path(client_log_file).with_suffix("").with_suffix(".pkl")
@@ -99,19 +102,24 @@ if __name__ == "__main__":
     pdf_file = md_file.with_suffix("").with_suffix(".pdf")
     xmin = df['elapsed_second'].min()
     xmax = df['elapsed_second'].max()
-    ymin = min(df['i_err'].min(), df['ds_err'].min(), df['sp_err'].min())
-    ymax = max(df['i_err'].max(), df['ds_err'].max(), df['sp_err'].max())
-    ax = df.plot(kind='scatter', x='elapsed_second', y='i_err', color='red', marker='x',
+    ymin = df[['i_err', 'ds_err', 'sp_err']].min().min()
+    ymax = df[['i_err', 'ds_err', 'sp_err']].max().max()
+    df.plot(x='elapsed_second', y=['i_err', 'ds_err', 'sp_err'], kind='line',
         xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
-        label=alg_names['i'], grid=True, legend=True, figsize=(10, 6),
-        xlim=(xmin, xmax), ylim=(ymin, ymax))
-    df.plot(kind='scatter', x='elapsed_second', y='ds_err', color='green', marker='o',
-        xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
-        label=alg_names['ds'], grid=True, legend=True, figsize=(10, 6),
-        ax=ax)
-    df.plot(kind='scatter', x='elapsed_second', y='sp_err', color='blue', marker='^',
-        xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
-        label=alg_names['sp'], grid=True, legend=True, figsize=(10, 6),
-        ax=ax)
+        label=[alg_names['i'], alg_names['ds'], alg_names['sp']],
+        grid=True, legend=True, figsize=(10, 6), xlim=(xmin, xmax),
+        ylim=(ymin, ymax))
+    # ax = df.plot(kind='scatter', x='elapsed_second', y='i_err', color='red', marker='x',
+    #     xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
+    #     label=alg_names['i'], grid=True, legend=True, figsize=(10, 6),
+    #     xlim=(xmin, xmax), ylim=(ymin, ymax))
+    # df.plot(kind='scatter', x='elapsed_second', y='ds_err', color='green', marker='o',
+    #     xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
+    #     label=alg_names['ds'], grid=True, legend=True, figsize=(10, 6),
+    #     ax=ax)
+    # df.plot(kind='scatter', x='elapsed_second', y='sp_err', color='blue', marker='^',
+    #     xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
+    #     label=alg_names['sp'], grid=True, legend=True, figsize=(10, 6),
+    #     ax=ax)
     plt.show()
     plt.savefig(pdf_file)
