@@ -148,7 +148,8 @@ csc_int_t csc_ds2(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint3
 {
     csc_int_t j = 0;
     // csc_int_t k = floor(i*(float)D/(float)A + 0.5); // a starting point; floor() not working for uint64_t on TelosB platform
-    csc_int_t k = (csc_int_t)(i*(float)D/(float)A + 0.5); // a starting point
+    // csc_int_t k = (csc_int_t)(i*(float)D/(float)A + 0.5); // a starting point
+    csc_int_t k = i; // a starting point avoiding overflow resulting from the original one
     csc_int_t td = (k - i)*A + i*(A - D); // "triangle down" to avoid overflow
     assert(td == k*A - i*D); // for debugging
 
@@ -191,7 +192,8 @@ csc_int_t csc_ds3(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint3
 {
     csc_int_t j = 0;
     // csc_int_t k = floor(i*(float)D/(float)A + 0.5); // a starting point; floor() not working for uint64_t on TelosB platform
-    csc_int_t k = (i / A) * D; // a starting point without floating-point operations
+    // csc_int_t k = (i / A) * D; // a starting point without floating-point operations
+    csc_int_t k = i; // a starting point avoiding overflow resulting from the original one
     csc_int_t td = (k - i) * A + i * (A - D); // "triangle down" to avoid overflow
     assert(td == k * A - i * D); // for debugging
 

@@ -21,10 +21,13 @@
 
 int64_t local_ftn(const int64_t i, const int64_t D, const int64_t A)
 {
-int64_t quotient = (i / A) * D;
-int64_t remainder = i % A;
-int64_t rounding = (remainder * D + (A / 2)) / A;
-return quotient + rounding;
+    int64_t quotient = (i / A) * D;
+    printf("DBG: quotient=%"PRId64"\n", quotient);
+    int64_t remainder = i % A;
+    printf("DBG: remainder=%"PRId64"\n", remainder);
+    int64_t rounding = (remainder * D + (A / 2)) / A;
+    printf("DBG: rounding=%"PRId64"\n", rounding);
+    return quotient + rounding;
 }
 
 PROCESS(big_int_process, "Big integer debug process");
@@ -33,18 +36,19 @@ AUTOSTART_PROCESSES(&big_int_process);
 PROCESS_THREAD(big_int_process, ev, data)
 {
     static struct etimer timer;
-    static int64_t i = 1000000000000000LL;
-    static int64_t D = 1000000LL;
-    static int64_t A = 1000075LL;
+    static int64_t is[] = {6260998858, 6349136858, 6475719945, 6650781983, 6730639020};
+    static int64_t Ds[] = {7985053352, 8072801192, 8199548072, 8375043760, 8453041832};
+    static int64_t As[] = {8012942942, 8101110627, 8228194770, 8404234237, 8482536472};
 
     PROCESS_BEGIN();
  
     etimer_set(&timer, CLOCK_SECOND * 10); // initial delay
 
-    printf("##### BEGIN #####\n");
-    printf("local function: %"PRId64"\n", local_ftn(i, D, A));
-    printf("external function: %"PRId64"\n", external_ftn(i, D, A));
-    printf("##### END #####\n");
+    // int N = sizeof(is) / sizeof(is[0]);
+    for (int i = 0; i < 5; i++) {
+        printf("i=%"PRId64", D=%"PRId64", A=%"PRId64", local_ftn=%"PRId64", external_ftn=%"PRId64"\n",
+            is[i], Ds[i], As[i], local_ftn(is[i], Ds[i], As[i]), external_ftn(is[i], Ds[i], As[i]));        
+    }
         
     PROCESS_END();
 }

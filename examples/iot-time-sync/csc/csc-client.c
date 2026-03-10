@@ -80,7 +80,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
   static uint32_t event_number = 0;
   static csc_int_t elapsed_ticks = 0; // elapsed rtimer ticks since CFR initialization
   static uint64_t iet = 0ULL; // inter-event time
-  static csc_int_t rst_ds; // result of CSC based on double-precision FP division
+  static csc_int_t rst_ds2; // result of CSC based on the "improved direct search" algorithm with no floating-point operations
   static csc_int_t rst_sp; // result of CSC based on single-precision FP division
   static csc_int_t diff;
   static rtimer_clock_t gpio_timestamp_prev = 0;
@@ -107,7 +107,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
 
               // post-processing indicator and header row for column names in CSV format
               printf("##### BEGIN\n"); 
-              printf("event_number,i,D,A,ds,sp,diff\n");
+              printf("event_number,i,D,A,ds2,sp,diff\n");
             }
             else {
               // handle timestamp wraparound
@@ -117,19 +117,15 @@ PROCESS_THREAD(csc_client_process, ev, data)
                 iet = (csc_int_t)(gpio_timestamp - gpio_timestamp_prev);
               }
               elapsed_ticks += iet;
+              rst_ds2 = csc_ds2(elapsed_ticks, D, A, &num_iter);
               rst_sp = csc_sp(elapsed_ticks, D, A, &num_iter);
-#ifndef NDEBUG
-              rst_ds = rst_sp; // skip the "direct search" algorithm for debugging
-#else
-              rst_ds = csc_ds(elapsed_ticks, D, A, &num_iter);
-#endif
-              diff = rst_ds - rst_sp;
+              diff = rst_ds2 - rst_sp;
               LOG_DBG("t=%"RTIMER_PRI": event_number=%"PRIu32", elapsed_ticks=%"CSC_INT_PRI", D=%"CSC_INT_PRI", A=%"CSC_INT_PRI"\n",
                 gpio_timestamp, event_number, elapsed_ticks, D, A);
 
               // data row in CSV format
               printf("%"PRIu32",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI",%"CSC_INT_PRI"\n",
-                event_number, elapsed_ticks, D, A, rst_ds, rst_sp, diff);
+                event_number, elapsed_ticks, D, A, rst_ds2, rst_sp, diff);
 
               if (event_number == EVENT_NUMBER_MAX) {
                 // indicator for post-processing
