@@ -235,6 +235,6 @@ csc_int_t csc_eds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint3
     *p_num_iter = 1;
     csc_int_t quotient = (i / A) * D;
     csc_int_t remainder = i % A;
-    csc_int_t rounding = (remainder * D + (A + 1) / 2) / A; // robust rounding
+    csc_int_t rounding = (remainder * D + A / 2) / A;
     return quotient + rounding;
 }
