@@ -32,10 +32,10 @@ DEFINES += RTIMER_EXT=3 # 32-bit rtimer running at 0.975 MHz (3.9 MHz SMCLK divi
 # DEFINES += RTIMER_EXT=4 # 32-bit rtimer running at 1.95 MHz (3.9 MHz SMCLK divided by 2; unstable!!!)
 
 # CSC optimization
-DEFINES += NDEBUG # turn off assert()
+DEFINES += NDEBUG # turn off assert() and debug-related routines
 DEFINES += CSC_INT_SIZE=4 # number of bytes for 'i', 'D', and 'A' (4 or 8)
 DEFINES += CSC_NO_ITER_CHECK=1 # turn off iteration couting in iterative algorithms
-DEFINES += CSC_NO_DIV_CHECK # turn off checking the value of A in division algorithms
+DEFINES += CSC_NO_DIV_CHECK=1 # turn off checking the value of A in division algorithms
 
 # experimental setup
 ### DEBUG

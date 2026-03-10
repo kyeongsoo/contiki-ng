@@ -109,7 +109,7 @@ PROCESS_THREAD(csc_server_process, ev, data)
       }
       event_number++;
       gpio_timestamp_prev = gpio_timestamp;
-      gpio_triggered = 0; // clear the flag
+      gpio_triggered = false; // clear the flag
     } // end of if () for GPIO trigger
   } // end of while () for event loop
 

@@ -5,17 +5,91 @@
  *         Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
  */
 
+#include <assert.h>
+#include <inttypes.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "contiki.h"
 #include "net/netstack.h"
 #include "os/lib/random.h"
 #include "sys/log.h"
-#include "sys/rtimer.h"
-#include "csc.h"
+// #include "sys/rtimer.h"
+// #include "csc.h"
 
 #define LOG_MODULE "CSC-Analysis"
 #define LOG_LEVEL LOG_LEVEL_NONE
+
+#if CSC_INT_SIZE == 4
+typedef int32_t csc_int_t;
+#define CSC_INT_MAX INT32_MAX
+#define CSC_INT_PRI PRId32
+#elif CSC_INT_SIZE == 8
+typedef int64_t csc_int_t;
+#define CSC_INT_MAX INT64_MAX
+#define CSC_INT_PRI PRId64
+#else
+#error Unsupported CSC_INT_SIZE
+#endif
+
+/**
+ * \brief CSC based on single-precision FP division.
+ */
+csc_int_t csc_sp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
+{
+#ifndef CSC_NO_DIV_CHECK
+    if (A == 0) {
+        return 0;
+    }
+#endif
+    *p_num_iter = 1;
+    // return (csc_int_t) floor((i*(float)D/(float)A) + 0.5); // floor() not working for uint64_t on TelosB platform
+    return (csc_int_t)((i*(float)D/(float)A) + 0.5);
+}
+
+/**
+ * \brief CSC based on the "improved direct search" algorithm.
+ * 
+ * \remarks For details, refer to the following paper:
+ * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to floating-point precision loss,"
+ *   arXiv:2504.15039 [cs.NI], Apr. 2025. [Online]. Available: https://arxiv.org/abs/2504.15039
+ */
+csc_int_t csc_ds2(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
+{
+    csc_int_t j = 0;
+    // csc_int_t k = floor(i*(float)D/(float)A + 0.5); // a starting point; floor() not working for uint64_t on TelosB platform
+    csc_int_t k = (csc_int_t)(i*(float)D/(float)A + 0.5); // a starting point
+    csc_int_t td = (k - i)*A + i*(A - D); // "triangle down" to avoid overflow
+    assert(td == k*A - i*D); // for debugging
+
+    *p_num_iter = 1;
+    if (td == 0) {
+        j = k;
+    }
+    else if (td > 0) {
+        k -= (td / A);
+        td %= A;
+        if (td == 0) {
+            j = k;
+        }
+        else {
+            j = k - (ABS(td - A) < ABS(td)); // branchless programming
+        } 
+    }
+    else { // td < 0
+        k += (-td / A);
+        td = td % A; // N.B.: different from mathematical modulo
+        if (td + A > 0) {
+            j = k + (ABS(td + A) < ABS(td)); // branchless programming
+        }
+        else {
+            j = k;
+        }
+    } // td < 0
+    return (csc_int_t) j;
+}
 
 PROCESS(csc_analysis_process, "CSC analysis process");
 AUTOSTART_PROCESSES(&csc_analysis_process);
@@ -37,8 +111,8 @@ PROCESS_THREAD(csc_analysis_process, ev, data)
     // N.B.: DS is the reference algorithm; double-precision is not supported in sky (TelosB) platform.
     // csc_int_t (*csc_algs[])(csc_int_t, csc_int_t, csc_int_t, uint32_t*) = {csc_ds, csc_sp, csc_ds2};
     // char *alg_names[] = {"ds", "sp", "ds2"};
-    csc_int_t (*csc_algs[])(csc_int_t, csc_int_t, csc_int_t, uint32_t*) = {csc_ds2, csc_ds3, csc_eds, csc_sp};
-    char *alg_names[] = {"ds2", "ds3", "eds", "sp"};
+    csc_int_t (*csc_algs[])(csc_int_t, csc_int_t, csc_int_t, uint32_t*) = {csc_ds2, csc_sp};
+    char *alg_names[] = {"ds2", "sp"};
     int N_algs = sizeof(csc_algs) / sizeof(csc_algs[0]);
     csc_int_t A, i, j[N_algs], diff;
     int skew;

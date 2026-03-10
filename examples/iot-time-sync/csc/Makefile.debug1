@@ -1,11 +1,10 @@
-CONTIKI_PROJECT = csc-analysis
+CONTIKI_PROJECT = csc-debug1
 all: $(CONTIKI_PROJECT)
 
 PROJECT_SOURCEFILES += csc.c
 TARGET_LIBFILES += -lm
 
-# disable networking
-MAKE_MAC = MAKE_MAC_NULLMAC
+MAKE_MAC = MAKE_MAC_CSMA
 MAKE_NET = MAKE_NET_NULLNET
 
 # disable TCP, UDP, and 6lowpan fragmentation
@@ -13,15 +12,11 @@ DEFINES += UIP_CONF_TCP=0
 DEFINES += UIP_CONF_UDP=0
 DEFINES += SICSLOWPAN_CONF_FRAG=0
 
-# disable module logs
-DEFINES += LOG_CONF_LEVEL_MAIN=0
-DEFINES += LOG_CONF_LEVEL_SKY=0
-
 # optimize CSC implementation
-# DEFINES += NDEBUG # turn off assert()
+DEFINES += NDEBUG
 DEFINES += CSC_INT_SIZE=8 # number of bytes for 'i', 'D', and 'A' (4 or 8)
-DEFINES += CSC_NO_ITER_COUNT=1 # turn off iteration couting in iterative algorithms
-DEFINES += CSC_NO_DIV_CHECK=1 # turn off checking the value of 'A' in division algorithms
+# DEFINES += CSC_NO_ITER_CHECK=1 # turn off iteration couting in iterative algorithms
+DEFINES += CSC_NO_DIV_CHECK=1 # turn off checking the value of A in division algorithms
 
 CONTIKI = ../../..
 include $(CONTIKI)/Makefile.include

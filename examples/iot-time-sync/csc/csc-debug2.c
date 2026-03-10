@@ -16,7 +16,7 @@ int main(void)
 {
     // experimental parameters
     csc_int_t i, A, D, j_ds, j_sp, diff;
-    uint32_t num_iter;
+    uint16_t num_iter;
 
     printf("i: ");
 #if CSC_INT_SIZE == 8
@@ -44,9 +44,9 @@ int main(void)
 #endif
 
     j_ds = csc_ds(i, D, A, &num_iter);
-    j_sp = csc_sp_div(i, D, A, &num_iter);
+    j_sp = csc_sp(i, D, A, &num_iter);
     diff = j_ds - j_sp;
-    printf("ds: j=%"CSC_INT_PRI", num_iter=%"PRIu32"\n", j_ds, num_iter);
+    printf("ds: j=%"CSC_INT_PRI", num_iter=%"PRIu16"\n", j_ds, num_iter);
     printf("sp_div: j=%"CSC_INT_PRI"\n", j_sp);
     printf("diff=%"CSC_INT_PRI"\n", diff);
 

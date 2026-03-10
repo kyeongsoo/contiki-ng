@@ -102,8 +102,9 @@ working_dir = "/home/user/contiki-ng/examples/iot-time-sync/csc"
 macros["BEACON_INTERVAL"] = 10 # beacon interval in seconds
 macros["NB_SKIP"] = 6 # 1 m
 macros["NB_CFR"] = 180 # 30 m
-macros["EVENT_NUMBER_MAX"] = 720 # ~2 h for 1 s event interarrival time
+macros["EVENT_NUMBER_MAX"] = 120 # ~2 h for 60 s event interarrival time
 macros["RADIO_OFF_PERIOD"] = 0 # no radio off time for testing
+del macros["NDEBUG"] # turn on assert() and debug-related routines
 
 # prepare commands for CSC on TelosB motes and event generation on a Raspberry Pi
 macros_str = "".join([f"DEFINES+={k}={v} " for k, v in macros.items()])
@@ -124,8 +125,8 @@ eg_command = [
         "--on_period", "0.1",
         "--log_folder", f"./log/{datetime_string}",
         "--num_events", f"{int(macros['EVENT_NUMBER_MAX']+5)}", # should be greater than 'EVENT_NUMBER_MAX'
-        "--interarrival_time", "10.0" # DEBUG
-        # "--interarrival_time", "1.0" # TEST
+        # "--interarrival_time", "10.0" # DEBUG
+        "--interarrival_time", "60.0" # TEST
     ]
 
 # save commands and macros to a JSON file for later use

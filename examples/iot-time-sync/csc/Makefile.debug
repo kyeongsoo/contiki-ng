@@ -11,9 +11,9 @@ TARGET1 = csc-debug1
 TARGET2 = csc-debug2
 
 # optimize CSC implementation
-DEFINES += CSC_INT_SIZE=4 # number of bytes for 'i', 'D', and 'A' (4 or 8)
-# DEFINES += CSC_NO_ITER_COUNT=1 # turn off iteration couting in iterative algorithms
-DEFINES += CSC_NO_DIV_CHECK=1 # turn off checking the value of A in division algorithms
+DEFINES += CSC_INT_SIZE=8 # number of bytes for 'i', 'D', and 'A' (4 or 8)
+# DEFINES += CSC_NO_ITER_CHECK=1 # turn off iteration couting in iterative algorithms
+DEFINES += CSC_NO_DIV_CHECK # turn off checking the value of A in division algorithms
 
 # Default target: builds the program when 'make' is run
 all: $(TARGET1) $(TARGET2)

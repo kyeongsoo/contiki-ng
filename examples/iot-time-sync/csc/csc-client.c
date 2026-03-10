@@ -68,7 +68,7 @@ PROCESS_THREAD(csc_client_process, ev, data)
   static csc_int_t D = 0; // cumulative departure time
   static csc_int_t iat = 0; // interarrival time
   static csc_int_t idt = 0; // interdeparture time
-  static uint16_t num_iter = 0; // ignored in this experiment
+  static uint32_t num_iter = 0; // ignored in this experiment
   static rtimer_clock_t rx_timestamp_prev = 0;
   static rtimer_clock_t tx_timestamp = 0;
   static rtimer_clock_t tx_timestamp_prev = 0;
@@ -117,8 +117,12 @@ PROCESS_THREAD(csc_client_process, ev, data)
                 iet = (csc_int_t)(gpio_timestamp - gpio_timestamp_prev);
               }
               elapsed_ticks += iet;
-              rst_ds = csc_ds(elapsed_ticks, D, A, &num_iter);
               rst_sp = csc_sp(elapsed_ticks, D, A, &num_iter);
+#ifndef NDEBUG
+              rst_ds = rst_sp; // skip the "direct search" algorithm for debugging
+#else
+              rst_ds = csc_ds(elapsed_ticks, D, A, &num_iter);
+#endif
               diff = rst_ds - rst_sp;
               LOG_DBG("t=%"RTIMER_PRI": event_number=%"PRIu32", elapsed_ticks=%"CSC_INT_PRI", D=%"CSC_INT_PRI", A=%"CSC_INT_PRI"\n",
                 gpio_timestamp, event_number, elapsed_ticks, D, A);
@@ -133,10 +137,30 @@ PROCESS_THREAD(csc_client_process, ev, data)
                 LOG_DBG("t=%"RTIMER_PRI": Exit the process\n", RTIMER_NOW());
                 PROCESS_EXIT(); // exit the process
               }
+#ifndef NDEBUG
+              else if (event_number >= 452) {
+                LOG_DBG("- RTIMER_NOW():      %"RTIMER_PRI"\n", RTIMER_NOW());
+                LOG_DBG("- event_number:      %"PRIu32":\n", event_number);
+                LOG_DBG("- cfr_initialized:   %d\n", cfr_initialized);
+                LOG_DBG("- event_initialized: %d\n", event_initialized);
+                LOG_DBG("- num_beacons:       %"PRIu32"\n", num_beacons);
+                LOG_DBG("- gpio_timestamp:    %"RTIMER_PRI"\n", gpio_timestamp);
+                LOG_DBG("- rx_timestamp:      %"RTIMER_PRI"\n", rx_timestamp);
+                LOG_DBG("- tx_timestamp:      %"RTIMER_PRI"\n", tx_timestamp);
+                LOG_DBG("- elapsed_ticks:     %"CSC_INT_PRI"\n", elapsed_ticks);
+                LOG_DBG("- num_iter:          %"PRIu32"\n", num_iter);
+                LOG_DBG("- iet:               %"PRIu64"\n", iet);
+                LOG_DBG("- P2DIR:             0x%02X (Should have bit %d as 0)\n", P2DIR, P2_EXT);
+                LOG_DBG("- P2SEL:             0x%02X (Should have bit %d as 0)\n", P2SEL, P2_EXT);
+                LOG_DBG("- P2IES:             0x%02X (Should have bit %d as 0 for Rising Edge)\n", P2IES, P2_EXT);
+                LOG_DBG("- P2IE:              0x%02X (Bit %d MUST be 1)\n", P2IE, P2_EXT);
+                LOG_DBG("- P2IN:              0x%02X (Current logic levels on all Port 2 pins)\n", P2IN);
+              }
+#endif
             } // end of else for "event_initialized == true"
             event_number++;
             gpio_timestamp_prev = gpio_timestamp;
-            gpio_triggered = 0; // clear the flag
+            gpio_triggered = false; // clear the flag
           } // end of if() for "cfr_initialized == true"
         } else if (beacon_received == true) {
           // process a received beacon

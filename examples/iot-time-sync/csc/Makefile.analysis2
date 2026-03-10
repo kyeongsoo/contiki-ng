@@ -1,7 +1,6 @@
-CONTIKI_PROJECT = csc-analysis
+CONTIKI_PROJECT = csc-analysis2
 all: $(CONTIKI_PROJECT)
 
-PROJECT_SOURCEFILES += csc.c
 TARGET_LIBFILES += -lm
 
 # disable networking
