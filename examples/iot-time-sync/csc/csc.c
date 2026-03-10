@@ -56,8 +56,9 @@ csc_int_t csc_sp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32
  * \brief CSC based on the "direct search" algorithm.
  * 
  * \remarks For details, refer to the following paper:
- * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to floating-point precision loss,"
- *   arXiv:2504.15039 [cs.NI], Apr. 2025. [Online]. Available: https://arxiv.org/abs/2504.15039
+ * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to
+ *   floating-point precision loss," arXiv:2504.15039 [cs.NI], Apr. 2025.
+ *   [Online]. Available: https://arxiv.org/abs/2504.15039
  */
 csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
 {
@@ -144,8 +145,9 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32
  * \brief CSC based on the "improved direct search" algorithm.
  * 
  * \remarks For details, refer to the following paper:
- * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to floating-point precision loss,"
- *   arXiv:2504.15039 [cs.NI], Apr. 2025. [Online]. Available: https://arxiv.org/abs/2504.15039
+ * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to
+ *   floating-point precision loss," arXiv:2504.15039 [cs.NI], Apr. 2025.
+ *   [Online]. Available: https://arxiv.org/abs/2504.15039
  */
 csc_int_t csc_ds2(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
 {
@@ -186,8 +188,9 @@ csc_int_t csc_ds2(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint3
  * \brief CSC based on the "improved direct search" algorithm with no floating-point operations.
  * 
  * \remarks For details, refer to the following paper:
- * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to floating-point precision loss,"
- *   arXiv:2504.15039 [cs.NI], Apr. 2025. [Online]. Available: https://arxiv.org/abs/2504.15039
+ * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to
+ *   floating-point precision loss," arXiv:2504.15039 [cs.NI], Apr. 2025.
+ *   [Online]. Available: https://arxiv.org/abs/2504.15039
  */
 csc_int_t csc_ds3(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
 {
@@ -237,6 +240,6 @@ csc_int_t csc_eds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint3
     *p_num_iter = 1;
     csc_int_t quotient = (i / A) * D;
     csc_int_t remainder = i % A;
-    csc_int_t rounding = (remainder * D + (A / 2)) / A;
+    csc_int_t rounding = (remainder * D + (A + 1) / 2) / A; // robust rounding
     return quotient + rounding;
 }
