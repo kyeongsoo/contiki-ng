@@ -37,8 +37,8 @@ PROCESS_THREAD(csc_analysis_process, ev, data)
     // N.B.: DS is the reference algorithm; double-precision is not supported in sky (TelosB) platform.
     // csc_int_t (*csc_algs[])(csc_int_t, csc_int_t, csc_int_t, uint32_t*) = {csc_ds, csc_sp, csc_ds2};
     // char *alg_names[] = {"ds", "sp", "ds2"};
-    csc_int_t (*csc_algs[])(csc_int_t, csc_int_t, csc_int_t, uint32_t*) = {csc_ds2, csc_ds3, csc_eds, csc_sp};
-    char *alg_names[] = {"ds2", "ds3", "eds", "sp"};
+    csc_int_t (*csc_algs[])(csc_int_t, csc_int_t, csc_int_t, uint32_t*) = {csc_eds, csc_ds3, csc_ds2, csc_sp};
+    char *alg_names[] = {"eds", "ds3", "ds2", "sp"};
     int N_algs = sizeof(csc_algs) / sizeof(csc_algs[0]);
     csc_int_t A, i, j[N_algs], diff;
     int skew;

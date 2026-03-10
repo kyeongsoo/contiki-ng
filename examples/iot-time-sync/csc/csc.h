@@ -11,11 +11,6 @@ typedef int64_t csc_int_t;
 #define CSC_INT_MAX INT64_MAX
 #define CSC_INT_MIN INT64_MIN
 #define CSC_INT_PRI PRId64
-#elif CSC_INT_SIZE == 16 && defined(__SIZEOF_INT128__)
-typedef __int128_t csc_int_t;
-#define CSC_INT_MAX ((__int128_t)(( (__uint128_t)1 << 127 ) - 1))
-#define CSC_INT_MIN (-CSC_INT_MAX - 1)
-#define CSC_INT_PRI PRId128
 #else
 #error Unsupported CSC_INT_SIZE
 #endif

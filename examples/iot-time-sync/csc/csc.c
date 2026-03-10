@@ -17,11 +17,6 @@
 #include <stdlib.h>
 #include "csc.h"
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__amd64__)
-#include <gmp.h>
-#include <mpfr.h>
-#define IEEE754_B512_PREC 498 // for IEEE 754-2008 binary512 format
-
 /**
  * \brief CSC based on double-precision FP division.
  */
