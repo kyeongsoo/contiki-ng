@@ -137,7 +137,8 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32
 }
 
 /**
- * \brief CSC based on the "improved direct search" algorithm.
+ * \brief CSC based on the efficient implementation of the "direct search" algorithm
+ *        without any loop and floating-point operation.
  * 
  * \remarks For details, refer to the following paper:
  * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to
@@ -147,9 +148,13 @@ csc_int_t csc_ds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32
 csc_int_t csc_ds2(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
 {
     csc_int_t j = 0;
+    //--------------------------------------------------------------------------
+    // options for a starting point:
     // csc_int_t k = floor(i*(float)D/(float)A + 0.5); // a starting point; floor() not working for uint64_t on TelosB platform
     // csc_int_t k = (csc_int_t)(i*(float)D/(float)A + 0.5); // a starting point
+    // csc_int_t k = (i / A) * D; // a starting point without floating-point operations (but possible overflow when A > i)
     csc_int_t k = i; // a starting point avoiding overflow resulting from the original one
+    //--------------------------------------------------------------------------
     csc_int_t td = (k - i)*A + i*(A - D); // "triangle down" to avoid overflow
     assert(td == k*A - i*D); // for debugging
 
@@ -181,51 +186,8 @@ csc_int_t csc_ds2(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint3
 }
 
 /**
- * \brief CSC based on the "improved direct search" algorithm with no floating-point operations.
- * 
- * \remarks For details, refer to the following paper:
- * - K. S. Kim, "Direct search algorithm for clock skew compensation immune to
- *   floating-point precision loss," arXiv:2504.15039 [cs.NI], Apr. 2025.
- *   [Online]. Available: https://arxiv.org/abs/2504.15039
- */
-csc_int_t csc_ds3(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
-{
-    csc_int_t j = 0;
-    // csc_int_t k = floor(i*(float)D/(float)A + 0.5); // a starting point; floor() not working for uint64_t on TelosB platform
-    // csc_int_t k = (i / A) * D; // a starting point without floating-point operations
-    csc_int_t k = i; // a starting point avoiding overflow resulting from the original one
-    csc_int_t td = (k - i) * A + i * (A - D); // "triangle down" to avoid overflow
-    assert(td == k * A - i * D); // for debugging
-
-    *p_num_iter = 1;
-    if (td == 0) {
-        j = k;
-    }
-    else if (td > 0) {
-        k -= (td / A);
-        td %= A;
-        if (td == 0) {
-            j = k;
-        }
-        else {
-            j = k - (ABS(td - A) < ABS(td)); // branchless programming
-        } 
-    }
-    else { // td < 0
-        k += (-td / A);
-        td = td % A; // N.B.: different from mathematical modulo
-        if (td + A > 0) {
-            j = k + (ABS(td + A) < ABS(td)); // branchless programming
-        }
-        else {
-            j = k;
-        }
-    } // td < 0
-    return (csc_int_t) j;
-}
-
-/**
- * \brief CSC based on the "Euclidean Decomposition Scaling (EDS)", which relies on "Euclidean Division" and the "Midpoint" Principle
+ * \brief CSC based on the "Euclidean Decomposition Scaling (EDS)" using
+ *        the "Euclidean Division" and the "Midpoint" Principle.
  */
 csc_int_t csc_eds(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32_t *p_num_iter)
 {

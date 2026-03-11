@@ -70,10 +70,10 @@ if __name__ == "__main__":
     df = pd.merge(df_s, df_c, on=['event_number'], how='inner')
     df['elapsed_second'] = df['elapsed_ticks'] / rtimer_second  
     df['i_err'] = (df['i'] - df['elapsed_ticks']) / rtimer_second
-    df['eds_err'] = (df['eds'] - df['elapsed_ticks']) / rtimer_second
+    df['ds2_err'] = (df['ds2'] - df['elapsed_ticks']) / rtimer_second
     df['sp_err'] = (df['sp'] - df['elapsed_ticks']) / rtimer_second
     df['i_abs_err'] = abs(df['i'] - df['elapsed_ticks']) / rtimer_second
-    df['eds_abs_err'] = abs(df['eds'] - df['elapsed_ticks']) / rtimer_second
+    df['ds2_abs_err'] = abs(df['ds2'] - df['elapsed_ticks']) / rtimer_second
     df['sp_abs_err'] = abs(df['sp'] - df['elapsed_ticks']) / rtimer_second
 
     # save the dataframe to a pickle file for later use
@@ -87,13 +87,13 @@ if __name__ == "__main__":
     with open(json_file, "r") as f:
         settings = json.load(f)
     md_file = pkl_file.with_suffix("").with_suffix(".md")
-    alg_names = {"i": "Uncompensated", "eds": "Compensated (Direct Search)", "sp": "Compensated (Single-Precision Division)"}
+    alg_names = {"i": "Uncompensated", "ds2": "Compensated (Direct Search)", "sp": "Compensated (Single-Precision Division)"}
     pd.set_option('display.float_format', '{:.4e}'.format)
     with open(md_file, "w") as f:
         f.write("# CSC Client and Server Settings\n")
         for k, v in settings.items():
             f.write(f"- {k}: {v}\n")
-        for alg in ['eds', 'sp']:
+        for alg in ['ds2', 'sp']:
             f.write(f"# {alg_names[alg]} Error\n")
             for k, v in df[alg + '_err'].describe().items():
                 f.write(f"- {k}: {v:.4e}\n")
@@ -102,20 +102,20 @@ if __name__ == "__main__":
     pdf_file = md_file.with_suffix("").with_suffix(".pdf")
     xmin = df['elapsed_second'].min()
     xmax = df['elapsed_second'].max()
-    ymin = df[['i_err', 'eds_err', 'sp_err']].min().min()
-    ymax = df[['i_err', 'eds_err', 'sp_err']].max().max()
-    df.plot(x='elapsed_second', y=['i_err', 'eds_err', 'sp_err'], kind='line',
+    ymin = df[['i_err', 'ds2_err', 'sp_err']].min().min()
+    ymax = df[['i_err', 'ds2_err', 'sp_err']].max().max()
+    df.plot(x='elapsed_second', y=['i_err', 'ds2_err', 'sp_err'], kind='line',
         xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
-        label=[alg_names['i'], alg_names['eds'], alg_names['sp']],
+        label=[alg_names['i'], alg_names['ds2'], alg_names['sp']],
         grid=True, legend=True, figsize=(10, 6), xlim=(xmin, xmax),
         ylim=(ymin, ymax))
     # ax = df.plot(kind='scatter', x='elapsed_second', y='i_err', color='red', marker='x',
     #     xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
     #     label=alg_names['i'], grid=True, legend=True, figsize=(10, 6),
     #     xlim=(xmin, xmax), ylim=(ymin, ymax))
-    # df.plot(kind='scatter', x='elapsed_second', y='eds_err', color='green', marker='o',
+    # df.plot(kind='scatter', x='elapsed_second', y='ds2_err', color='green', marker='o',
     #     xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',
-    #     label=alg_names['eds'], grid=True, legend=True, figsize=(10, 6),
+    #     label=alg_names['ds2'], grid=True, legend=True, figsize=(10, 6),
     #     ax=ax)
     # df.plot(kind='scatter', x='elapsed_second', y='sp_err', color='blue', marker='^',
     #     xlabel='Time [s]', ylabel='Event Time Estimation Error [s]',

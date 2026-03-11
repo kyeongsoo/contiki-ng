@@ -13,22 +13,40 @@
 #include "contiki.h"
 #include "floortest.h"
 
-// int64_t local_ftn(const int64_t i, const int64_t D, const int64_t A)
-// {
-//     // return (int64_t) floor((i*(float)D/(float)A) + 0.5);
-//     return (int64_t)((i*D)+(A/2))/A;
-// }
-
 int64_t local_ftn(const int64_t i, const int64_t D, const int64_t A)
 {
-    int64_t quotient = (i / A) * D;
-    printf("DBG: quotient=%"PRId64"\n", quotient);
-    int64_t remainder = i % A;
-    printf("DBG: remainder=%"PRId64"\n", remainder);
-    int64_t rounding = (remainder * D + (A / 2)) / A;
-    printf("DBG: rounding=%"PRId64"\n", rounding);
-    return quotient + rounding;
+    printf("DBG: i=%"PRId64"\n", i);
+    printf("DBG: D=%"PRId64"\n", D);
+    printf("DBG: A=%"PRId64"\n", A);
+    float i_f = (float)i;
+    float D_f = (float)D;
+    float A_f = (float)A;
+    float R = D_f / A_f;
+    float rtn = i*D_f/A_f;
+    printf("DBG: integer part of i_f=%"PRId64"\n", (int64_t)i_f);
+    printf("DBG: fractional part of i_f=%"PRId64"\n", (int64_t)((i_f - (int64_t)i_f)*1000000));
+    printf("DBG: integer part of D_f=%"PRId64"\n", (int64_t)D_f);
+    printf("DBG: fractional part of D_f=%"PRId64"\n", (int64_t)((D_f - (int64_t)D_f)*1000000));
+    printf("DBG: integer part of A_f=%"PRId64"\n", (int64_t)A_f);   
+    printf("DBG: fractional part of A_f=%"PRId64"\n", (int64_t)((A_f - (int64_t)A_f)*1000000));
+    printf("DBG: integer part of R=%"PRId64"\n", (int64_t)R);
+    printf("DBG: fractional part of R=%"PRId64"\n", (int64_t)((R - (int64_t)R)*1000000));
+    printf("DBG: integer part of rtn=%"PRId64"\n", (int64_t)rtn);
+    printf("DBG: fractional part of rtn=%"PRId64"\n", (int64_t)((rtn - (int64_t)rtn)*1000000));
+    return (int64_t) floor((i*(float)D/(float)A) + 0.5);
+    // return (int64_t)((i*D)+(A/2))/A;
 }
+
+// int64_t local_ftn(const int64_t i, const int64_t D, const int64_t A)
+// {
+//     int64_t quotient = (i / A) * D;
+//     printf("DBG: quotient=%"PRId64"\n", quotient);
+//     int64_t remainder = i % A;
+//     printf("DBG: remainder=%"PRId64"\n", remainder);
+//     int64_t rounding = (remainder * D + (A / 2)) / A;
+//     printf("DBG: rounding=%"PRId64"\n", rounding);
+//     return quotient + rounding;
+// }
 
 PROCESS(big_int_process, "Big integer debug process");
 AUTOSTART_PROCESSES(&big_int_process);
