@@ -17,6 +17,34 @@
 #include <stdlib.h>
 #include "csc.h"
 
+#ifdef __MSP430__
+typedef union {
+  float f;
+  uint32_t u;
+} float_cast;
+
+int64_t ftoi64(float f)
+{
+    float_cast fc;
+
+    fc.f = f;
+    uint32_t s = (fc.u >> 31) & 0x1; // 0 = positive, 1 = negative
+    uint32_t e = (fc.u >> 23) & 0xFF;
+    uint32_t m = fc.u & 0x7FFFFF; // mantissa/significand
+
+    uint64_t m_value = (uint64_t)(m + (1UL << 23)); // fraction raised by 2**23
+    int16_t e_value = e - 150; // 127 + 23
+    
+    int64_t result;
+    if (e_value >= 0) {
+        result = (int64_t)(m_value << e_value);
+    } else {
+        result = (int64_t)(m_value >> (-e_value));
+    }
+    return ((s & 1) ? -1 : 1) * result;
+}
+#endif
+
 /**
  * \brief CSC based on double-precision FP division.
  */
@@ -43,8 +71,12 @@ csc_int_t csc_sp(const csc_int_t i, const csc_int_t D, const csc_int_t A, uint32
     }
 #endif
     *p_num_iter = 1;
+#if CSC_INT_SIZE == 8 && defined(__MSP430__)
+    return ftoi64((i*(float)D/(float)A) + 0.5);
+#else
     // return (csc_int_t) floor((i*(float)D/(float)A) + 0.5); // floor() not working for uint64_t on TelosB platform
     return (csc_int_t)((i*(float)D/(float)A) + 0.5);
+#endif
 }
 
 /**
